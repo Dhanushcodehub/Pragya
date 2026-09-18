@@ -107,12 +107,23 @@ function LoginForm() {
         .single();
 
       if (supaError || !data) {
-        throw new Error('Invalid Class Code or PIN');
+        console.error("Supabase Error:", supaError, "Data:", data);
+        throw new Error('Invalid Class Code or PIN: ' + (supaError ? supaError.message : 'No data found'));
       }
 
       // Store student session in localStorage
       localStorage.setItem('pragya_student_id', data.id);
       localStorage.setItem('pragya_student_name', data.name);
+      
+      // Seed a dummy quiz config so the old QuizTakeClient doesn't redirect
+      sessionStorage.setItem('focus_quiz_config', JSON.stringify({
+        subjectId: 'reading',
+        topicId: 'baseline',
+        difficulty: 1,
+        questionCount: 5,
+        timerDuration: 600,
+        mode: 'standard'
+      }));
       
       router.push('/quiz/take');
     } catch (err: any) {
