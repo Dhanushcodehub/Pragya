@@ -224,8 +224,8 @@ function HeroSection() {
           >
             Making Learning ...     {'     '}
             <span className="relative inline-block">
-              
-              <span className="relative z-10" style={{ color: '#5a6ba8' }}>Easy.</span>
+
+              <span className="relative z-10" style={{ color: '#5a6ba8' }}>Visible..</span>
               <motion.span
                 className="absolute left-0 bottom-1 w-full h-[6px] rounded-full -z-0"
                 style={{ backgroundColor: C.accentPink }}
@@ -422,20 +422,20 @@ function ProblemSection() {
             animate={
               isJumping
                 ? {
-                    y: [0, -70, 8, -3, 0],
-                    rotate: [0, 360, 360, 360, 360],
-                    scale: [1, 1.15, 0.92, 1.04, 1],
-                  }
+                  y: [0, -70, 8, -3, 0],
+                  rotate: [0, 360, 360, 360, 360],
+                  scale: [1, 1.15, 0.92, 1.04, 1],
+                }
                 : isHovered
                   ? {
-                      y: [0, -10, 0],
-                      scale: 1.08,
-                      rotate: [0, -2, 2, 0],
-                    }
+                    y: [0, -10, 0],
+                    scale: 1.08,
+                    rotate: [0, -2, 2, 0],
+                  }
                   : {
-                      y: [0, -4, 0],
-                      scale: 1,
-                    }
+                    y: [0, -4, 0],
+                    scale: 1,
+                  }
             }
             transition={
               isJumping
@@ -598,15 +598,15 @@ function ProblemSection() {
           transition={{ duration: 0.6, delay: 0.15 }}
         >
           Some children run ahead with words. Some need to meet each letter first. Neither is "slow" — they are just at different steps. The trouble begins when one lesson tries to fit all forty, and the child at the first step is left waiting in the back.
-Best for: the softest, most parent/child-safe framing; pairs naturally with your owl mascot.
+          Best for: the softest, most parent/child-safe framing; pairs naturally with your owl mascot.
         </motion.p>
 
         {/* Pain-point cards */}
         <div className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-6">
           {[
             { emoji: '👥', title: '40', desc: 'learners in one Class 5 room — all stamped the same grade' },
-            { emoji: '📖', title: '1',  desc: 'textbook, one lesson, one pace — for children 3 levels apart'},
-            { emoji: '❓', title: '0',  desc: 'at-a-glance sight of real reading levels at term start' },
+            { emoji: '📖', title: '1', desc: 'textbook, one lesson, one pace — for children 3 levels apart' },
+            { emoji: '❓', title: '0', desc: 'at-a-glance sight of real reading levels at term start' },
           ].map(({ emoji, title, desc, source }, idx) => (
             <motion.div
               key={title + idx}
@@ -705,7 +705,7 @@ function CapabilitiesSection() {
       {/* Background glowing orbs */}
       <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full blur-[120px] opacity-40 pointer-events-none" style={{ backgroundColor: C.accentPurple }} />
       <div className="absolute bottom-0 left-0 w-[500px] h-[500px] rounded-full blur-[120px] opacity-40 pointer-events-none" style={{ backgroundColor: C.accentBlue }} />
-      
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="text-center mb-16">
           <motion.h2
