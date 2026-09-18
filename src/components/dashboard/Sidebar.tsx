@@ -56,11 +56,11 @@ export default function Sidebar({ userEmail }: SidebarProps) {
 
   const navItems = [
     { name: 'Command Center',            href: '/dashboard',       icon: Compass },
-    { name: 'Classroom Map',          href: '/notes',           icon: FileText },
+    // { name: 'Classroom Map',          href: '/notes',           icon: FileText },
     { name: 'Assessment Engine',                 href: '/quiz',            icon: HelpCircle },
-    { name: 'Teacher Copilot',    href: '/interview',       icon: Mic },
+    // { name: 'Teacher Copilot',    href: '/interview',       icon: Mic },
     { name: 'Learning DNA',      href: '/career-guidance', icon: GraduationCap },
-    { name: 'Security Settings',    href: '/settings',        icon: Shield }
+    // { name: 'Security Settings',    href: '/settings',        icon: Shield }
   ];
 
   const displayName = userEmail.split('@')[0].toUpperCase();
