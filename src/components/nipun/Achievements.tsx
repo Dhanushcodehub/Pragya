@@ -5,13 +5,20 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ArrowLeft, Award, Flame, Sparkles, Lock, CheckCircle2 } from 'lucide-react';
 import { Learner } from '@/lib/nipun/types';
+import { useStudent } from '@/lib/nipun/StudentContext';
+import { Loader2 } from 'lucide-react';
 import { MOCK_ACTIVE_STUDENT } from '@/lib/nipun/syntheticData';
 
 interface AchievementsProps {
   learner?: Learner;
 }
 
-export default function Achievements({ learner = MOCK_ACTIVE_STUDENT }: AchievementsProps) {
+export default function Achievements({ learner: propLearner }: AchievementsProps) {
+  const { learner: contextLearner, isLoading } = useStudent();
+  const learner = propLearner || contextLearner;
+  if (isLoading) return <div className="flex justify-center p-12"><Loader2 className="w-8 h-8 animate-spin text-amber-500" /></div>;
+  if (!learner) return null;
+
   const unlockedCount = learner.badges.filter(b => b.isUnlocked).length;
   const totalCount = learner.badges.length;
 
@@ -94,7 +101,7 @@ export default function Achievements({ learner = MOCK_ACTIVE_STUDENT }: Achievem
             >
               <div>
                 <div className="flex justify-between items-start mb-3">
-                  <span className="text-4xl">{badge.icon}</span>
+                  <div className="text-amber-500"><Award className="w-10 h-10" /></div>
                   {badge.isUnlocked ? (
                     <span className="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded-full border border-emerald-300 flex items-center gap-1">
                       <CheckCircle2 className="w-3 h-3" /> Unlocked
