@@ -17,7 +17,7 @@ export default function Achievements({ learner = MOCK_ACTIVE_STUDENT }: Achievem
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-12">
-      {/* ─── HEADER ─── */}
+      {/*  HEADER  */}
       <div className="flex items-center gap-3">
         <Link
           href="/student"
@@ -27,7 +27,7 @@ export default function Achievements({ learner = MOCK_ACTIVE_STUDENT }: Achievem
         </Link>
         <div>
           <h1 className="text-2xl font-bold font-fredoka text-gray-900">
-            Trophy Cabinet & Badges 🏆
+            Trophy Cabinet & Badges 
           </h1>
           <p className="text-xs text-gray-600 font-medium">
             Earn badges by practicing quests and unlocking new learning levels!
@@ -35,11 +35,11 @@ export default function Achievements({ learner = MOCK_ACTIVE_STUDENT }: Achievem
         </div>
       </div>
 
-      {/* ─── SUMMARY CARDS ─── */}
+      {/*  SUMMARY CARDS  */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="p-5 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 shadow-xs flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-sm text-2xl">
-            🏆
+            
           </div>
           <div>
             <span className="text-[11px] font-bold uppercase text-amber-800">Badges Unlocked</span>
@@ -51,7 +51,7 @@ export default function Achievements({ learner = MOCK_ACTIVE_STUDENT }: Achievem
 
         <div className="p-5 rounded-2xl bg-gradient-to-br from-orange-50 to-amber-50 border border-orange-200 shadow-xs flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-orange-500 text-white flex items-center justify-center shadow-sm text-2xl">
-            🔥
+            
           </div>
           <div>
             <span className="text-[11px] font-bold uppercase text-orange-800">Learning Streak</span>
@@ -63,7 +63,7 @@ export default function Achievements({ learner = MOCK_ACTIVE_STUDENT }: Achievem
 
         <div className="p-5 rounded-2xl bg-gradient-to-br from-yellow-50 to-amber-50 border border-yellow-200 shadow-xs flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-yellow-500 text-white flex items-center justify-center shadow-sm text-2xl">
-            ⚡
+            
           </div>
           <div>
             <span className="text-[11px] font-bold uppercase text-yellow-800">Total XP</span>
@@ -74,7 +74,7 @@ export default function Achievements({ learner = MOCK_ACTIVE_STUDENT }: Achievem
         </div>
       </div>
 
-      {/* ─── BADGES GRID ─── */}
+      {/*  BADGES GRID  */}
       <div className="bg-white p-6 sm:p-8 rounded-3xl border-2 border-amber-200 shadow-sm space-y-6">
         <h2 className="text-lg font-bold font-fredoka text-gray-900 flex items-center gap-2">
           <Award className="w-5 h-5 text-amber-500" />

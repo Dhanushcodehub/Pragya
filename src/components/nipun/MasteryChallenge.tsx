@@ -56,7 +56,7 @@ export default function MasteryChallenge({
       {step === 'intro' && (
         <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="space-y-4">
           <div className="w-20 h-20 mx-auto rounded-3xl bg-amber-100 border-2 border-amber-300 flex items-center justify-center text-4xl shadow-sm">
-            🏆
+            
           </div>
           <span className="text-xs font-extrabold uppercase tracking-widest px-3 py-1 bg-amber-500 text-white rounded-full">
             MASTERY CHALLENGE
@@ -72,7 +72,7 @@ export default function MasteryChallenge({
             onClick={() => setStep('question')}
             className="w-full py-4 bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-extrabold text-base rounded-2xl shadow-md hover:brightness-105 transition-all flex items-center justify-center gap-2"
           >
-            Start Challenge Now ⚡
+            Start Challenge Now 
           </button>
         </motion.div>
       )}
@@ -108,12 +108,12 @@ export default function MasteryChallenge({
       {step === 'result' && (
         <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="space-y-6">
           <div className="w-24 h-24 mx-auto rounded-3xl bg-amber-100 border-4 border-amber-400 flex items-center justify-center text-5xl shadow-md">
-            {isPassed ? '🎉' : '🌱'}
+            {isPassed ? '' : ''}
           </div>
 
           <div>
             <h2 className="text-2xl sm:text-3xl font-extrabold font-fredoka text-gray-900">
-              {isPassed ? 'MASTERY UNLOCKED! 🏆' : 'Almost There! 🌟'}
+              {isPassed ? 'MASTERY UNLOCKED! ' : 'Almost There! '}
             </h2>
             <p className="text-sm font-medium text-gray-600 mt-1">
               {isPassed 
