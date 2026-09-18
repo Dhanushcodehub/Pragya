@@ -56,6 +56,7 @@ export default function Sidebar({ userEmail }: SidebarProps) {
 
   const navItems = [
     { name: 'Command Center',            href: '/dashboard',       icon: Compass },
+    { name: 'Student Portal',            href: '/student',         icon: Award },
     { name: 'Classroom Map',          href: '/notes',           icon: FileText },
     { name: 'Assessment Engine',                 href: '/quiz',            icon: HelpCircle },
     { name: 'Teacher Copilot',    href: '/interview',       icon: Mic },

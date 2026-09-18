@@ -1,1 +1,4 @@
 @AGENTS.md
+@PROJECT.md
+@ARCHITECTURE.md
+@TASKS.md

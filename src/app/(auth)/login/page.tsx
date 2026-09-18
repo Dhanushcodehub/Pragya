@@ -94,8 +94,8 @@ function LoginForm() {
 
   const handleStudentLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Mock student login - redirect to assessment
-    router.push('/dashboard');
+    // Student login - redirect directly to student portal
+    router.push('/student');
   };
 
   const handlePasskeyLogin = async () => {
