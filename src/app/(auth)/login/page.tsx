@@ -39,6 +39,9 @@ const C = {
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [role, setRole] = useState<'teacher' | 'student'>('teacher');
+  const [studentCode, setStudentCode] = useState('');
+  const [studentPin, setStudentPin] = useState('');
   const nextPath = searchParams.get('next') || '/dashboard';
   
   const [formData, setFormData] = useState({
@@ -87,6 +90,12 @@ function LoginForm() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleStudentLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    // Mock student login - redirect to assessment
+    router.push('/dashboard');
   };
 
   const handlePasskeyLogin = async () => {
@@ -211,7 +220,19 @@ function LoginForm() {
         </div>
       )}
 
-      <form className="space-y-5" onSubmit={handleSubmit}>
+      
+      {role === 'teacher' && (
+        <>
+          <div className="flex justify-end mb-4">
+            <span className="text-xs font-medium text-zinc-500">
+              New Teacher?{' '}
+              <Link href="/signup" className="text-blue-600 hover:underline">
+                Register here
+              </Link>
+            </span>
+          </div>
+          <form className="space-y-5" onSubmit={handleSubmit}>
+
         <div>
           <label
             htmlFor="email"
@@ -351,6 +372,83 @@ function LoginForm() {
           Continue with Google
         </button>
       </div>
+        </>
+      )}
+
+      {role === 'student' && (
+        <form className="space-y-5" onSubmit={handleStudentLogin}>
+          <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-6">
+            <p className="text-sm text-blue-800 font-medium text-center">
+              Ask your teacher for your Class Code and PIN!
+            </p>
+          </div>
+
+          <div>
+            <label
+              htmlFor="studentCode"
+              className="block text-xs font-semibold uppercase tracking-wider mb-2"
+              style={{ color: C.outline }}
+            >
+              Class Code
+            </label>
+            <input
+              id="studentCode"
+              type="text"
+              required
+              value={studentCode}
+              onChange={(e) => setStudentCode(e.target.value.toUpperCase())}
+              placeholder="e.g. HAPPY-STARS"
+              className="block w-full px-3 py-3 border rounded-xl text-center text-lg font-bold uppercase tracking-widest focus:outline-none focus:ring-2 transition-all"
+              style={{
+                backgroundColor: C.surfaceContainerLow,
+                borderColor: C.outlineVariant,
+                color: C.onSurface,
+                '--tw-ring-color': C.primary,
+              } as React.CSSProperties}
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="studentPin"
+              className="block text-xs font-semibold uppercase tracking-wider mb-2"
+              style={{ color: C.outline }}
+            >
+              Secret PIN
+            </label>
+            <input
+              id="studentPin"
+              type="password"
+              required
+              maxLength={4}
+              value={studentPin}
+              onChange={(e) => setStudentPin(e.target.value)}
+              placeholder="****"
+              className="block w-full px-3 py-3 border rounded-xl text-center text-2xl tracking-[0.5em] focus:outline-none focus:ring-2 transition-all"
+              style={{
+                backgroundColor: C.surfaceContainerLow,
+                borderColor: C.outlineVariant,
+                color: C.onSurface,
+                '--tw-ring-color': C.primary,
+              } as React.CSSProperties}
+            />
+          </div>
+
+          <div>
+            <button
+              type="submit"
+              className="w-full flex justify-center py-3.5 px-4 rounded-xl text-sm font-bold transition-all hover:scale-[1.02]"
+              style={{
+                backgroundColor: '#FFBE91', // Peach color from design system
+                color: '#000',
+                boxShadow: '0 4px 16px rgba(255, 190, 145, 0.4)',
+              }}
+            >
+              Start Learning!
+            </button>
+          </div>
+        </form>
+      )}
     </div>
   );
 }

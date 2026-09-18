@@ -9,6 +9,7 @@ import {
 } from 'lucide-react';
 import { evaluatePassword, type PasswordStrengthResult } from '@/utils/passwordStrength';
 import { signUpAction } from '../../auth/actions';
+import FlyingPencil from '@/components/flying-pencil';
 
 // ─── Colour constants matching the landing page design system ──────────────
 const C = {
@@ -230,7 +231,17 @@ export default function SignupPage() {
           <p className="text-sm leading-relaxed" style={{ color: C.onSurfaceVariant }}>
             Sign up to start assessing your students and build their learning DNA. Securely access the Pragya Assessment Engine.
           </p>
-        </div>
+      </div>
+      
+      <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-8 text-center">
+        <p className="text-sm text-blue-800 font-medium">
+          <strong>Are you a student?</strong><br/>
+          Students do not need to register. Ask your teacher for your Class Code to log in!
+        </p>
+        <Link href="/login" className="text-xs text-blue-600 hover:underline mt-2 inline-block font-bold">
+          Go to Student Login &rarr;
+        </Link>
+      </div>
 
         <div className="text-[10px] uppercase tracking-widest font-bold z-10 text-center" style={{ color: C.outline }}>
           ASER DIYA INSPIRED &bull; FOUNDATIONAL LEARNING
