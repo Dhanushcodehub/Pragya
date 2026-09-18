@@ -77,7 +77,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
     }
 
     loadStudent();
-  }, [supabase]);
+  }, []);
 
   const addXp = (amount: number) => {
     if (!learner) return;
