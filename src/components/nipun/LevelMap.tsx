@@ -34,7 +34,7 @@ export default function LevelMap({ learner = MOCK_ACTIVE_STUDENT }: LevelMapProp
 
   return (
     <div className="max-w-4xl mx-auto space-y-6 pb-12">
-      {/* ─── HEADER & WORLD SWITCHER ─── */}
+      {/*  HEADER & WORLD SWITCHER  */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Link
@@ -47,7 +47,7 @@ export default function LevelMap({ learner = MOCK_ACTIVE_STUDENT }: LevelMapProp
             <h1 
               className="text-2xl font-bold font-fredoka text-gray-900"
             >
-              Visual Quest Map 🗺️
+              Visual Quest Map ️
             </h1>
             <p className="text-xs text-gray-600 font-medium">
               Tap any unlocked level node to start practicing!
@@ -65,7 +65,7 @@ export default function LevelMap({ learner = MOCK_ACTIVE_STUDENT }: LevelMapProp
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
-            <span>📚</span> Reading World
+            Reading World
           </button>
           <button
             onClick={() => { setActiveWorld('numeracy'); setSelectedStage(null); }}
@@ -75,16 +75,16 @@ export default function LevelMap({ learner = MOCK_ACTIVE_STUDENT }: LevelMapProp
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
-            <span>🔢</span> Numeracy World
+            Numeracy World
           </button>
         </div>
       </div>
 
-      {/* ─── QUEST MAP CANVAS ─── */}
+      {/*  QUEST MAP CANVAS  */}
       <div className="bg-gradient-to-b from-amber-50/50 via-emerald-50/30 to-amber-50/50 p-6 sm:p-10 rounded-3xl border-2 border-emerald-100 shadow-sm relative overflow-hidden">
         <div className="text-center mb-8">
           <span className="text-xs font-extrabold uppercase tracking-widest px-3 py-1 bg-white text-emerald-800 rounded-full border border-emerald-200 shadow-xs">
-            {activeWorld === 'reading' ? '📖 READING PATHWAY' : '🧮 NUMERACY PATHWAY'}
+            {activeWorld === 'reading' ? ' READING PATHWAY' : ' NUMERACY PATHWAY'}
           </span>
         </div>
 
@@ -128,7 +128,7 @@ export default function LevelMap({ learner = MOCK_ACTIVE_STUDENT }: LevelMapProp
                       )}
                       {isCurrent && (
                         <div className="w-7 h-7 rounded-full bg-amber-600 text-white flex items-center justify-center shadow-md border-2 border-white font-bold text-xs">
-                          ★
+                          
                         </div>
                       )}
                       {isLocked && (
@@ -152,7 +152,7 @@ export default function LevelMap({ learner = MOCK_ACTIVE_STUDENT }: LevelMapProp
                     }`}>
                       {stage.name}
                       <span className="block text-[10px] font-normal opacity-80">
-                        {isMastered ? 'Mastered ✓' : isCurrent ? `${stage.progressPercent}% Active` : 'Locked 🔒'}
+                        {isMastered ? 'Mastered ' : isCurrent ? `${stage.progressPercent}% Active` : 'Locked '}
                       </span>
                     </span>
                   </div>
@@ -163,7 +163,7 @@ export default function LevelMap({ learner = MOCK_ACTIVE_STUDENT }: LevelMapProp
         </div>
       </div>
 
-      {/* ─── STAGE SELECTION MODAL / DRAWER ─── */}
+      {/*  STAGE SELECTION MODAL / DRAWER  */}
       {selectedStage && (
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
@@ -192,7 +192,7 @@ export default function LevelMap({ learner = MOCK_ACTIVE_STUDENT }: LevelMapProp
               onClick={() => setSelectedStage(null)}
               className="text-gray-400 hover:text-gray-600 text-xl font-bold p-1"
             >
-              ✕
+              
             </button>
           </div>
 

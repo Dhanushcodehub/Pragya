@@ -23,9 +23,7 @@ export default function StudentHeader() {
         {/* Logo & Brand */}
         <div className="flex items-center gap-3">
           <Link href="/student" className="flex items-center gap-2 group">
-            <div className="w-10 h-10 rounded-2xl bg-amber-400 border-2 border-amber-500 flex items-center justify-center text-xl font-black shadow-sm group-hover:scale-105 transition-transform">
-              🌟
-            </div>
+            <div className="w-10 h-10 rounded-2xl bg-amber-400 border-2 border-amber-500 flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform"><Sparkles className="w-6 h-6 text-amber-900" /></div>
             <div>
               <span className="text-xl font-bold font-fredoka tracking-tight text-amber-950 block leading-tight">
                 Pragya <span className="text-amber-600 text-sm font-semibold">Kids</span>
@@ -51,7 +49,7 @@ export default function StudentHeader() {
                     : 'text-gray-600 hover:text-gray-900 hover:bg-white/60'
                 }`}
               >
-                <span>{item.emoji}</span>
+                <item.icon className="w-4 h-4" />
                 <span>{item.name}</span>
               </Link>
             );
@@ -61,7 +59,7 @@ export default function StudentHeader() {
         {/* Student Badge & Teacher Exit Button */}
         <div className="flex items-center gap-3">
           <div className="hidden sm:flex items-center gap-2 bg-white px-3 py-1.5 rounded-2xl border border-amber-200 shadow-sm">
-            <span className="text-xl">{student.avatar}</span>
+            <div className="w-7 h-7 rounded-full bg-amber-100 flex items-center justify-center border border-amber-200"><Award className="w-4 h-4 text-amber-600" /></div>
             <div className="text-left">
               <p className="text-xs font-extrabold text-gray-900 leading-none">{student.name.split(' ')[0]}</p>
               <p className="text-[10px] font-semibold text-amber-700 leading-tight">Class {student.grade} &bull; Roll #{student.rollNo ?? '01'}</p>
@@ -93,7 +91,7 @@ export default function StudentHeader() {
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              <span className="text-base">{item.emoji}</span>
+              <item.icon className="w-5 h-5" />
               <span>{item.name.split(' ')[0]}</span>
             </Link>
           );

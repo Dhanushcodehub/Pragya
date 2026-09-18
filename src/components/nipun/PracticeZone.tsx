@@ -79,7 +79,7 @@ export default function PracticeZone() {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6 pb-12">
-      {/* ─── PRACTICE HEADER ─── */}
+      {/*  PRACTICE HEADER  */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link
@@ -90,7 +90,7 @@ export default function PracticeZone() {
           </Link>
           <div>
             <span className="text-xs font-bold uppercase text-emerald-700">
-              {pathwayParam === 'reading' ? '📖 READING PRACTICE' : '🧮 NUMERACY PRACTICE'}
+              {pathwayParam === 'reading' ? ' READING PRACTICE' : ' NUMERACY PRACTICE'}
             </span>
             <h1 className="text-xl font-bold font-fredoka text-gray-900">
               Question {currentIdx + 1} of {questions.length}
@@ -104,12 +104,12 @@ export default function PracticeZone() {
         </div>
       </div>
 
-      {/* ─── QUESTION CARD ─── */}
+      {/*  QUESTION CARD  */}
       <div className="bg-white p-6 sm:p-10 rounded-3xl border-2 border-emerald-200 shadow-lg space-y-6">
         {/* Audio Prompt Button */}
         <div className="flex justify-between items-center bg-emerald-50 p-3 rounded-2xl border border-emerald-200">
           <span className="text-xs font-bold text-emerald-900 flex items-center gap-2">
-            <span>🌱</span> Read aloud or tap to listen
+            Read aloud or tap to listen
           </span>
           <button
             onClick={() => handlePlayAudio(currentQ.audioPrompt || currentQ.content)}
@@ -172,7 +172,7 @@ export default function PracticeZone() {
                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
             }`}
           >
-            Check Answer ✨
+            Check Answer 
           </button>
         ) : (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
@@ -197,7 +197,7 @@ export default function PracticeZone() {
               onClick={handleNextQuestion}
               className="w-full py-4 bg-emerald-700 hover:bg-emerald-800 text-white font-extrabold text-base rounded-2xl shadow-md transition-all flex items-center justify-center gap-2"
             >
-              <span>{currentIdx + 1 < questions.length ? 'Next Question' : 'Take Mastery Challenge 🎉'}</span>
+              <span>{currentIdx + 1 < questions.length ? 'Next Question' : 'Take Mastery Challenge '}</span>
               <ArrowRight className="w-5 h-5" />
             </button>
           </motion.div>

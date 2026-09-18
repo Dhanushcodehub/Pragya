@@ -40,7 +40,7 @@ export default function StudentHome({ learner = MOCK_ACTIVE_STUDENT }: StudentHo
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto pb-12">
-      {/* ─── TOP WELCOME & XP BANNER ─── */}
+      {/*  TOP WELCOME & XP BANNER  */}
       <div 
         className="p-6 md:p-8 rounded-3xl border border-[#e6e2db] shadow-sm relative overflow-hidden"
         style={{ backgroundColor: C.surfaceContainerLow }}
@@ -64,7 +64,7 @@ export default function StudentHome({ learner = MOCK_ACTIVE_STUDENT }: StudentHo
                 className="text-2xl md:text-3xl font-extrabold mt-1 tracking-tight"
                 style={{ color: C.primary, fontFamily: 'var(--font-fredoka), sans-serif' }}
               >
-                Welcome back, {learner.name.split(' ')[0]}! 🌟
+                Welcome back, {learner.name.split(' ')[0]}! <Sparkles className="inline-block w-6 h-6 text-amber-500 mb-1" />
               </h1>
               <p className="text-sm font-medium text-gray-600 mt-0.5">
                 Ready for your learning quest today? Let's explore!
@@ -96,7 +96,7 @@ export default function StudentHome({ learner = MOCK_ACTIVE_STUDENT }: StudentHo
         </div>
       </div>
 
-      {/* ─── CURRENT QUEST HERO BANNER ─── */}
+      {/*  CURRENT QUEST HERO BANNER  */}
       <div className="bg-gradient-to-r from-emerald-700 to-teal-800 text-white p-6 md:p-8 rounded-3xl shadow-md relative overflow-hidden">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
@@ -120,7 +120,7 @@ export default function StudentHome({ learner = MOCK_ACTIVE_STUDENT }: StudentHo
         </div>
       </div>
 
-      {/* ─── TWO LEARNING WORLDS GRID ─── */}
+      {/*  TWO LEARNING WORLDS GRID  */}
       <div>
         <h2 className="text-xl font-bold mb-4 font-fredoka text-gray-900 flex items-center gap-2">
           <span>Choose Your Learning World</span>
@@ -136,7 +136,7 @@ export default function StudentHome({ learner = MOCK_ACTIVE_STUDENT }: StudentHo
             <div>
               <div className="flex justify-between items-start mb-4">
                 <div className="w-12 h-12 rounded-2xl bg-emerald-100 border border-emerald-300 flex items-center justify-center text-2xl shadow-sm">
-                  📚
+                  
                 </div>
                 <span className="text-xs font-bold px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full border border-emerald-300">
                   Reading World
@@ -209,7 +209,7 @@ export default function StudentHome({ learner = MOCK_ACTIVE_STUDENT }: StudentHo
             <div>
               <div className="flex justify-between items-start mb-4">
                 <div className="w-12 h-12 rounded-2xl bg-amber-100 border border-amber-300 flex items-center justify-center text-2xl shadow-sm">
-                  🔢
+                  
                 </div>
                 <span className="text-xs font-bold px-3 py-1 bg-amber-100 text-amber-800 rounded-full border border-amber-300">
                   Numeracy World
@@ -276,7 +276,7 @@ export default function StudentHome({ learner = MOCK_ACTIVE_STUDENT }: StudentHo
         </div>
       </div>
 
-      {/* ─── MY BADGES & ACHIEVEMENTS STRIP ─── */}
+      {/*  MY BADGES & ACHIEVEMENTS STRIP  */}
       <div 
         className="p-6 rounded-3xl border border-[#e6e2db]"
         style={{ backgroundColor: C.surfaceContainerLow }}
@@ -290,7 +290,7 @@ export default function StudentHome({ learner = MOCK_ACTIVE_STUDENT }: StudentHo
             href="/student/achievements" 
             className="text-xs font-bold text-amber-700 hover:underline flex items-center gap-1"
           >
-            View All ({learner.badges.length}) →
+            View All ({learner.badges.length}) 
           </Link>
         </div>
 
@@ -307,7 +307,7 @@ export default function StudentHome({ learner = MOCK_ACTIVE_STUDENT }: StudentHo
               <div className="text-3xl mb-1">{badge.icon}</div>
               <p className="text-xs font-bold text-gray-800 truncate">{badge.title}</p>
               <p className="text-[10px] text-gray-500 mt-0.5 truncate">
-                {badge.isUnlocked ? 'Unlocked ✓' : 'Locked 🔒'}
+                {badge.isUnlocked ? 'Unlocked ' : 'Locked '}
               </p>
             </div>
           ))}
