@@ -76,7 +76,6 @@ function Nav() {
     <>
       <a href="#how-it-works" onClick={() => setMobileOpen(false)} className="hover:text-black transition-colors">How it works</a>
       <a href="#capabilities" onClick={() => setMobileOpen(false)} className="hover:text-black transition-colors">Capabilities</a>
-      <a href="#agents" onClick={() => setMobileOpen(false)} className="hover:text-black transition-colors">Agents</a>
     </>
   );
 
@@ -180,7 +179,6 @@ function Nav() {
 
 // ─── Hero Section ─────────────────────────────────────────────────────────────
 function HeroSection() {
-  const [activeIdx, setActiveIdx] = useState(0);
   const reducedMotion = usePrefersReducedMotion();
   const magnetic = useMagnetic(10);
 
@@ -188,22 +186,6 @@ function HeroSection() {
   const { scrollYProgress } = useScroll({ target: sectionRef, offset: ['start start', 'end start'] });
   const parallaxY = useTransform(scrollYProgress, [0, 1], [0, reducedMotion ? 0 : 60]);
   const fade = useTransform(scrollYProgress, [0, 0.8], [1, 0.4]);
-
-  useEffect(() => {
-    if (reducedMotion) return;
-    const timer = setInterval(() => {
-      setActiveIdx((prev) => (prev + 1) % 5);
-    }, 2800);
-    return () => clearInterval(timer);
-  }, [reducedMotion]);
-
-  const agents = [
-    { letter: 'P', label: 'Learning Investigator', desc: 'Diagnosing exact reading level...', color: C.accentGreen, textColor: '#15803d', strokeColor: '#22c55e' },
-    { letter: 'R', label: 'Skill Profiler', desc: 'Mapping sub-skills and gaps...', color: C.accentBlue, textColor: '#1d4ed8', strokeColor: '#3b82f6' },
-    { letter: 'C', label: 'Group Generator', desc: 'Forming dynamic student groups...', color: C.accentYellow, textColor: '#a16207', strokeColor: '#eab308' },
-    { letter: 'K', label: 'Teacher Copilot', desc: 'Generating classroom interventions...', color: C.accentPink, textColor: '#be185d', strokeColor: '#ec4899' },
-    { letter: 'Q', label: 'Quest Engine', desc: 'Generating adaptive student quests...', color: C.accentPurple, textColor: '#ffffff', strokeColor: '#d3579a' },
-  ];
 
   return (
     <section ref={sectionRef} className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-24 overflow-hidden">
@@ -240,9 +222,10 @@ function HeroSection() {
             className="text-5xl sm:text-6xl font-extrabold leading-[1.05] tracking-tight mb-6"
             style={{ color: C.primary, fontFamily: 'var(--font-jakarta), sans-serif' }}
           >
-            Making Learning Visible for{' '}
+            Making Learning ...     {'     '}
             <span className="relative inline-block">
-              <span className="relative z-10" style={{ color: '#5a6ba8' }}>Course—Instantly.</span>
+              
+              <span className="relative z-10" style={{ color: '#5a6ba8' }}>Easy.</span>
               <motion.span
                 className="absolute left-0 bottom-1 w-full h-[6px] rounded-full -z-0"
                 style={{ backgroundColor: C.accentPink }}
@@ -326,75 +309,16 @@ function HeroSection() {
             </>
           )}
 
-          {/* Central card */}
-          <div
-            className="relative z-10 p-6 rounded-3xl shadow-2xl border max-w-sm w-full bg-white/80 backdrop-blur-md"
-            style={{ borderColor: C.surfaceVariant }}
-          >
-            {/* Hub icon */}
-            <div className="flex items-center justify-center mb-6">
-              <div
-                className="w-14 h-14 rounded-full flex items-center justify-center animate-pulse"
-                style={{ backgroundColor: `${C.accentBlue}50`, boxShadow: `0 0 20px ${C.accentBlue}` }}
-              >
-                <svg className="w-7 h-7" style={{ color: C.primary }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path d="M13 10V3L4 14h7v7l9-11h-7z" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
-                </svg>
-              </div>
-            </div>
-
-            {/* Agent rows with real-time active animation layout */}
-            <div className="space-y-2.5">
-              {agents.map(({ letter, label, desc, color, textColor, strokeColor }, index) => {
-                const isActive = index === activeIdx;
-                return (
-                  <motion.div
-                    key={label}
-                    className="flex items-center gap-3 p-3 rounded-2xl border transition-colors duration-500"
-                    style={{
-                      backgroundColor: isActive ? 'white' : `${C.surfaceContainerLow}50`,
-                      borderColor: isActive ? strokeColor : C.surfaceVariant,
-                      boxShadow: isActive ? `0 8px 20px ${strokeColor}1c` : 'none',
-                    }}
-                    animate={{ scale: isActive ? 1.02 : 1 }}
-                    transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-                  >
-                    <div
-                      className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm shrink-0 transition-transform duration-500"
-                      style={{
-                        backgroundColor: isActive ? color : `${color}30`,
-                        color: isActive ? (textColor === '#ffffff' ? '#ffffff' : textColor) : textColor,
-                        boxShadow: isActive ? `0 0 10px ${color}` : 'none',
-                      }}
-                    >
-                      {letter}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs font-bold" style={{ color: C.onSurface }}>{label}</span>
-                        {isActive && (
-                          <span className="text-[8px] font-extrabold tracking-widest px-1.5 py-0.5 rounded bg-zinc-900 text-white animate-pulse">
-                            ACTIVE
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-[10px] truncate mt-0.5" style={{ color: isActive ? '#4b5563' : '#9ca3af' }}>
-                        {isActive ? desc : 'Idle'}
-                      </p>
-                      <div className="mt-2 relative h-1.5 w-full bg-zinc-200/50 rounded-full overflow-hidden">
-                        <motion.div
-                          className="absolute left-0 top-0 h-full rounded-full"
-                          style={{ backgroundColor: strokeColor }}
-                          initial={{ width: '15%' }}
-                          animate={{ width: isActive ? '100%' : '15%' }}
-                          transition={isActive ? { duration: 2.8, ease: 'linear', repeat: Infinity } : { duration: 0.3 }}
-                        />
-                      </div>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
+          {/* Hero student image */}
+          <div className="relative z-10 w-full max-w-sm">
+            <motion.img
+              src="/hero-student.jpg"
+              alt="A smiling student holding a stack of books"
+              className="w-full h-auto rounded-3xl shadow-2xl object-cover"
+              style={{ borderRadius: '2rem' }}
+              whileHover={{ scale: 1.03 }}
+              transition={{ type: 'spring', stiffness: 200, damping: 20 }}
+            />
           </div>
 
           {/* Floating badges with custom motion path */}
@@ -407,7 +331,7 @@ function HeroSection() {
                 transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
               >
                 <span className="w-3 h-3 rounded-full bg-green-500 animate-ping" />
-                <span className="text-sm font-semibold" style={{ color: C.primary }}>Research Complete</span>
+                <span className="text-sm font-semibold" style={{ color: C.primary }}>Enjoy Learning</span>
               </motion.div>
               <motion.div
                 className="absolute bottom-8 left-4 px-4 py-2 rounded-xl shadow-lg border flex items-center gap-2"
@@ -416,7 +340,7 @@ function HeroSection() {
                 transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
               >
                 <span className="w-3 h-3 rounded-full" style={{ backgroundColor: C.accentBlue }} />
-                <span className="text-sm font-semibold" style={{ color: C.primary }}>Syllabus Generated</span>
+                <span className="text-sm font-semibold" style={{ color: C.primary }}>Happy Learning</span>
               </motion.div>
             </>
           )}
@@ -429,9 +353,9 @@ function HeroSection() {
         style={{ borderColor: C.surfaceVariant }}
       >
         {[
-          { value: '10x', label: 'Faster Creation' },
-          { value: '5+', label: 'Specialised Agents' },
-          { value: '∞', label: 'Personalisation' },
+          { value: '🔤', label: 'Read Words' },
+          { value: '🔢', label: 'Count Numbers' },
+          { value: '🏰', label: 'Unlock Worlds' },
         ].map(({ value, label }, idx) => (
           <motion.div
             key={label}
@@ -662,8 +586,8 @@ function ProblemSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          The Content Creation{' '}
-          <span style={{ color: C.accentPurple }}>Challenge</span>
+          Every Child Learns{' '}
+          <span style={{ color: C.accentPurple }}>Differently</span>
         </motion.h2>
         <motion.p
           className="max-w-2xl mx-auto mb-12 text-lg leading-relaxed"
@@ -673,29 +597,36 @@ function ProblemSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.15 }}
         >
-          Educational content creation requires curriculum design, research, assessment creation, and storytelling. Today, these tasks rely on disconnected tools and immense manual effort. Even specialized AI models operate in silos, failing to deliver unified educational goals.
+          Some children run ahead with words. Some need to meet each letter first. Neither is "slow" — they are just at different steps. The trouble begins when one lesson tries to fit all forty, and the child at the first step is left waiting in the back.
+Best for: the softest, most parent/child-safe framing; pairs naturally with your owl mascot.
         </motion.p>
 
         {/* Pain-point cards */}
         <div className="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-6">
           {[
-            { emoji: '⏰', title: '47+ Hours', desc: 'Average time to build one complete course module manually' },
-            { emoji: '🔧', title: '8+ Tools', desc: 'Different tools educators juggle to produce one course' },
-            { emoji: '📉', title: '72% Dropout', desc: 'Of courses fail due to poor personalisation and pacing' },
-          ].map(({ emoji, title, desc }, idx) => (
+            { emoji: '👥', title: '40', desc: 'learners in one Class 5 room — all stamped the same grade' },
+            { emoji: '📖', title: '1',  desc: 'textbook, one lesson, one pace — for children 3 levels apart'},
+            { emoji: '❓', title: '0',  desc: 'at-a-glance sight of real reading levels at term start' },
+          ].map(({ emoji, title, desc, source }, idx) => (
             <motion.div
-              key={title}
+              key={title + idx}
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: idx * 0.1 }}
               whileHover={{ scale: 1.03, y: -4 }}
-              className="p-6 rounded-3xl border text-left transition-all duration-300"
+              className="p-6 rounded-3xl border text-left transition-all duration-300 flex flex-col gap-2"
               style={{ backgroundColor: C.surfaceContainerLow, borderColor: C.surfaceVariant }}
             >
-              <div className="text-3xl mb-3">{emoji}</div>
-              <div className="text-2xl font-extrabold mb-1" style={{ color: C.primary }}>{title}</div>
-              <p className="text-sm leading-relaxed" style={{ color: C.onSurfaceVariant }}>{desc}</p>
+              <div className="text-3xl">{emoji}</div>
+              <div className="text-4xl font-extrabold" style={{ color: C.primary }}>{title}</div>
+              <p className="text-sm leading-relaxed flex-1" style={{ color: C.onSurfaceVariant }}>{desc}</p>
+              <span
+                className="self-start text-[11px] font-bold px-2 py-0.5 rounded-md mt-1"
+                style={{ backgroundColor: `${C.accentPurple}22`, color: C.accentPurple, fontFamily: 'monospace' }}
+              >
+                {source}
+              </span>
             </motion.div>
           ))}
         </div>
@@ -708,23 +639,26 @@ function ProblemSection() {
 function CapabilitiesSection() {
   const capabilities = [
     {
-      id: 'career',
-      title: 'AI Career Guidance',
-      desc: 'Map out your future with personalized, data-driven career pathways tailored to your skills and goals.',
+      id: 'investigator',
+      title: 'AI Learning Investigator',
+      desc: "Doesn't just mark a child wrong. It forms a hypothesis, fires a targeted probe, gathers evidence, then explains the gap in plain language.",
+      guardNote: 'This is your named differentiator — keep it in the hero (wide) slot.',
+      simLabel: 'INVESTIGATOR TRACE → HYPOTHESIS ▶ PROBE EVIDENCE ▶ WHY',
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
         </svg>
       ),
       bg: C.accentPurple,
       textColor: '#ffffff',
       colSpan: 'md:col-span-2',
-      imagePlaceholder: 'Career mapping network graph simulation'
     },
     {
-      id: 'quiz',
-      title: 'Adaptive Quiz Arena',
-      desc: 'Test your knowledge with agent-generated mocks, instantly adjusting to your weak points.',
+      id: 'conductor',
+      title: 'Adaptive Diagnostic Conductor',
+      desc: 'The teacher runs a short ASER-inspired check one-on-one and taps each response. Difficulty adapts in the background.',
+      guardNote: 'Must carry the line: "the child never takes a digital test."',
+      simLabel: 'LIVE PATH → LEVEL SHIFTS PER TAP',
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -733,26 +667,28 @@ function CapabilitiesSection() {
       bg: C.accentYellow,
       textColor: '#6b4f00',
       colSpan: 'md:col-span-1',
-      imagePlaceholder: 'Live quiz score animation'
     },
     {
-      id: 'course',
-      title: 'Curriculum Generator',
-      desc: 'Instantly build fully structured, multi-module courses from a single prompt.',
+      id: 'dna',
+      title: 'Learning DNA Profile',
+      desc: 'Never one score. A sub-skill-by-skill profile — letter → word → sentence → paragraph → story — each with evidence and confidence.',
+      guardNote: 'No raw % shown to students; this card is the teacher view.',
+      simLabel: 'SUB-SKILL BARS + CONFIDENCE',
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
         </svg>
       ),
       bg: C.accentBlue,
       textColor: '#1e3a6e',
       colSpan: 'md:col-span-1',
-      imagePlaceholder: 'Course modules cascading into view'
     },
     {
-      id: 'interview',
-      title: 'Interview Simulator',
-      desc: 'Upload your resume and practice with our AI interviewer for real-world readiness.',
+      id: 'classroom',
+      title: 'Classroom Intelligence',
+      desc: "One screen for the whole class: a learning-level heatmap, auto-groups by shared need, and a single \"Today's Next Action.\"",
+      guardNote: 'Group by need, never by rank. No public leaderboard.',
+      simLabel: '40-LEARNER HEATMAP ▶ ONE NEXT ACTION',
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -761,7 +697,6 @@ function CapabilitiesSection() {
       bg: C.accentGreen,
       textColor: '#15803d',
       colSpan: 'md:col-span-2',
-      imagePlaceholder: 'Resume parsing layout'
     },
   ];
 
@@ -781,8 +716,8 @@ function CapabilitiesSection() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            A Unified Platform for <br />
-            <span style={{ color: C.accentPurple }}>Unstoppable Growth</span>
+            Four Tools. <br />
+            <span style={{ color: C.accentPurple }}>One Teacher. Every Child.</span>
           </motion.h2>
           <motion.p
             className="max-w-2xl mx-auto text-lg"
@@ -792,7 +727,7 @@ function CapabilitiesSection() {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.15 }}
           >
-            Say goodbye to scattered tools. Pragya brings all your learning, assessment, and career planning features into one beautifully integrated ecosystem.
+            Pragya gives every teacher a pocket intelligence layer — diagnose where each child actually is, group by shared need, and know exactly what to teach next.
           </motion.p>
         </div>
 
@@ -809,37 +744,55 @@ function CapabilitiesSection() {
               style={{ backgroundColor: 'rgba(255,255,255,0.7)', borderColor: C.surfaceVariant, backdropFilter: 'blur(20px)' }}
             >
               {/* Animated hover gradient */}
-              <div 
-                className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-500 pointer-events-none" 
+              <div
+                className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-500 pointer-events-none"
                 style={{ background: `radial-gradient(circle at 100% 100%, ${cap.bg}, transparent 70%)` }}
               />
-              
-              <div className="relative z-10 flex flex-col h-full justify-between gap-10">
+
+              <div className="relative z-10 flex flex-col h-full justify-between gap-8">
                 <div>
-                  <div 
+                  {/* Icon badge */}
+                  <div
                     className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 shadow-lg transform group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300"
                     style={{ backgroundColor: cap.bg, color: cap.textColor }}
                   >
                     {cap.icon}
                   </div>
-                  <h3 className="text-3xl font-extrabold tracking-tight mb-3" style={{ color: C.primary }}>
+                  <h3 className="text-2xl font-extrabold tracking-tight mb-3" style={{ color: C.primary }}>
                     {cap.title}
                   </h3>
                   <p className="text-base leading-relaxed max-w-md" style={{ color: C.onSurfaceVariant }}>
                     {cap.desc}
                   </p>
                 </div>
-                
-                {/* Abstract UI representation for the bento card */}
-                <div className="relative w-full h-32 rounded-xl overflow-hidden border mt-auto" style={{ backgroundColor: C.surfaceContainerLowest, borderColor: C.surfaceVariant }}>
-                  <div className="absolute inset-0 flex items-center justify-center opacity-30 text-sm font-bold tracking-widest uppercase">
-                    {cap.imagePlaceholder}
+
+                {/* Sim-box — replaces old imagePlaceholder */}
+                <div
+                  className="relative w-full rounded-xl overflow-hidden border mt-auto"
+                  style={{ backgroundColor: C.inverseSurface, borderColor: C.outline }}
+                >
+                  {/* Sim label row */}
+                  <div className="flex items-center gap-2 px-4 py-2 border-b" style={{ borderColor: C.outline }}>
+                    <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: cap.bg }} />
+                    <span
+                      className="text-[11px] font-extrabold tracking-widest uppercase"
+                      style={{ color: C.inverseOnSurface, fontFamily: 'monospace', letterSpacing: '0.08em' }}
+                    >
+                      {cap.simLabel}
+                    </span>
                   </div>
-                  {/* Subtle decorative elements to imply UI */}
-                  <div className="absolute top-4 left-4 right-4 h-2 rounded-full opacity-20" style={{ backgroundColor: cap.bg }} />
-                  <div className="absolute top-8 left-4 w-2/3 h-2 rounded-full opacity-10" style={{ backgroundColor: cap.bg }} />
-                  <div className="absolute bottom-4 right-4 w-8 h-8 rounded-full opacity-20" style={{ backgroundColor: cap.bg }} />
+                  {/* Decorative bar lines to suggest a live UI */}
+                  <div className="px-4 py-3 flex flex-col gap-2">
+                    <div className="h-2 rounded-full w-full opacity-30" style={{ backgroundColor: cap.bg }} />
+                    <div className="h-2 rounded-full w-3/4 opacity-20" style={{ backgroundColor: cap.bg }} />
+                    <div className="h-2 rounded-full w-1/2 opacity-10" style={{ backgroundColor: cap.bg }} />
+                  </div>
                 </div>
+
+                {/* Guard note */}
+                <p className="text-[11px] leading-snug italic" style={{ color: C.outline }}>
+                  ⚑ {cap.guardNote}
+                </p>
               </div>
             </motion.div>
           ))}
@@ -849,14 +802,39 @@ function CapabilitiesSection() {
   );
 }
 
+
 // ─── How it Works / Process Section ──────────────────────────────────────────
 function ProcessSection() {
   const magnetic = useMagnetic(10);
   const steps = [
-    { n: '1', title: 'Define the Goal', desc: 'Enter a single prompt detailing your topic, audience, and educational challenge.' },
-    { n: '2', title: 'The AI Team Assembles', desc: 'The Orchestrator Agent breaks down the task and spins up specialized agents for research, writing, and assessment.' },
-    { n: '3', title: 'Collaborative Execution', desc: 'Agents share context and build the course collaboratively, ensuring pedagogical alignment.' },
-    { n: '4', title: 'Ready for Assessment', desc: 'Export a complete, personalized learning module ready for your LMS or application.', accent: true },
+    {
+      n: '1',
+      title: 'The Check',
+      desc: 'The teacher runs a short, ASER-inspired check one-on-one and taps each response. The child never takes a digital test.',
+      proves: 'Methodology fidelity — teacher-administered, not a kid quiz',
+      accent: false,
+    },
+    {
+      n: '2',
+      title: 'The Probe',
+      desc: 'Difficulty adapts by rule; when evidence is thin, the investigator fires one targeted probe — never a black box.',
+      proves: 'Deterministic core + confidence probe (§20, §25), anti-black-box (§35.4)',
+      accent: false,
+    },
+    {
+      n: '3',
+      title: 'The Profile',
+      desc: 'Each child is mapped skill by skill, letter to story, with evidence, confidence, and a gap vs the benchmark.',
+      proves: 'Sub-skill classification + benchmark mapping (§11, §29)',
+      accent: false,
+    },
+    {
+      n: '4',
+      title: 'The Plan',
+      desc: 'One view shows who needs help with what, grouped by need, with a single next action — never a ranking.',
+      proves: 'Teacher-facing summary + grouping-by-need + no-ranking (§8, §22)',
+      accent: true,
+    },
   ];
 
   return (
@@ -871,8 +849,8 @@ function ProcessSection() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            From Prompt to Complete{' '}
-            <span style={{ color: C.accentPurple }}>Curriculum</span>
+            One Session.{' '}
+            <span style={{ color: C.accentPurple }}>Four Moments of Truth.</span>
           </motion.h2>
           <motion.p
             className="max-w-2xl mx-auto"
@@ -882,37 +860,31 @@ function ProcessSection() {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.15 }}
           >
-            See how PRAGYA transforms a simple idea into a rich, structured learning journey.
+            From a single tap-based check to a full classroom plan — here is what happens inside every Pragya session.
           </motion.p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 relative">
-          {/* connecting line, animated draw-in */}
-          <div
-            className="hidden md:block absolute top-[22px] left-[10%] right-[10%] h-0.5 overflow-hidden"
-            style={{ backgroundColor: C.surfaceVariant, zIndex: 0 }}
-          >
-            <motion.div
-              className="h-full"
-              style={{ backgroundColor: C.primary }}
-              initial={{ width: '0%' }}
-              whileInView={{ width: '100%' }}
-              viewport={{ once: true }}
-              transition={{ duration: 1.2, ease: 'easeInOut', delay: 0.2 }}
-            />
-          </div>
-          {steps.map(({ n, title, desc, accent }, idx) => (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+
+
+          {steps.map(({ n, title, desc, proves, accent }, idx) => (
             <motion.div
               key={n}
-              className="text-center relative"
-              style={{ backgroundColor: C.surfaceContainerLowest, zIndex: 1 }}
+              className="relative flex flex-col gap-4 p-5 rounded-2xl border"
+              style={{
+                backgroundColor: accent ? `${C.accentBlue}18` : C.surfaceContainerLowest,
+                borderColor: accent ? C.accentBlue : C.surfaceVariant,
+                zIndex: 1,
+              }}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: idx * 0.15 }}
+              whileHover={{ y: -4, boxShadow: '0 8px 24px rgba(0,0,0,0.08)' }}
             >
+              {/* Step number bubble */}
               <motion.div
-                className="w-11 h-11 mx-auto rounded-full flex items-center justify-center font-bold text-lg mb-4 shadow-md"
+                className="w-11 h-11 rounded-full flex items-center justify-center font-bold text-lg shadow-md shrink-0"
                 style={{
                   backgroundColor: accent ? C.accentBlue : C.primary,
                   color: accent ? C.primary : C.onPrimary,
@@ -922,8 +894,31 @@ function ProcessSection() {
               >
                 {n}
               </motion.div>
-              <h4 className="font-bold text-lg mb-2" style={{ color: C.primary }}>{title}</h4>
-              <p className="text-sm" style={{ color: C.onSurfaceVariant }}>{desc}</p>
+
+              {/* Title + caption */}
+              <div>
+                <h4 className="font-extrabold text-lg mb-1.5" style={{ color: C.primary }}>{title}</h4>
+                <p className="text-sm leading-relaxed" style={{ color: C.onSurfaceVariant }}>{desc}</p>
+              </div>
+
+              {/* "What it secretly proves" badge */}
+              <div
+                className="mt-auto rounded-xl px-3 py-2.5 border"
+                style={{
+                  backgroundColor: C.inverseSurface,
+                  borderColor: C.outline,
+                }}
+              >
+                <p
+                  className="text-[10px] font-extrabold uppercase tracking-widest mb-1"
+                  style={{ color: C.accentPurple, fontFamily: 'monospace' }}
+                >
+                  ▸ What it proves
+                </p>
+                <p className="text-[11px] leading-snug" style={{ color: C.inverseOnSurface }}>
+                  {proves}
+                </p>
+              </div>
             </motion.div>
           ))}
         </div>
@@ -938,7 +933,7 @@ function ProcessSection() {
             className="inline-flex items-center gap-2 px-8 py-4 rounded-full font-bold text-lg transition-transform duration-150 ease-out hover:scale-[1.03] active:scale-[0.98] shadow-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
             style={{ backgroundColor: C.primary, color: C.onPrimary, boxShadow: '0 8px 24px rgba(0,0,0,0.18)', ...magnetic.style, '--tw-ring-color': C.primary } as React.CSSProperties}
           >
-            Start Your First Session
+            Run Your First Check
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path d="M13 7l5 5m0 0l-5 5m5-5H6" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
             </svg>
@@ -948,6 +943,7 @@ function ProcessSection() {
     </section>
   );
 }
+
 
 // ─── Footer ───────────────────────────────────────────────────────────────────
 function Footer() {
@@ -962,10 +958,10 @@ function Footer() {
         className="max-w-4xl mx-auto px-4 text-center mb-16"
       >
         <h2 className="text-3xl font-extrabold mb-4" style={{ color: C.primary }}>
-          Ready to build the ultimate digital learning hub?
+          Bring This to Your Cluster
         </h2>
         <p className="mb-8 text-lg" style={{ color: C.onSurfaceVariant }}>
-          Join the waitlist to access the Pragya multi-agent content creation API.
+          Join the waitlist to access the Pragya.
         </p>
         <Link
           href="/signup"
@@ -981,13 +977,13 @@ function Footer() {
         className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 border-t pt-10 flex flex-col md:flex-row justify-between items-center gap-6"
         style={{ borderColor: C.surfaceVariant }}
       >
-        <div className="text-xl font-bold tracking-tight" style={{ color: C.outline, fontFamily: 'var(--font-fredoka), sans-serif' }}>Pragya.AI</div>
+        <div className="text-xl font-bold tracking-tight" style={{ color: C.outline, fontFamily: 'var(--font-fredoka), sans-serif' }}>Pragya</div>
         <div className="flex gap-6 text-sm" style={{ color: C.onSurfaceVariant }}>
           <a href="#" className="hover:text-black transition-colors">Privacy Policy</a>
           <a href="#" className="hover:text-black transition-colors">Terms of Service</a>
           <a href="#" className="hover:text-black transition-colors">Contact</a>
         </div>
-        <div className="text-sm" style={{ color: C.outline }}>© 2025 Pragya AI. All rights reserved.</div>
+        <div className="text-sm" style={{ color: C.outline }}>© 2026 Pragya . All rights reserved.</div>
       </div>
     </footer>
   );
