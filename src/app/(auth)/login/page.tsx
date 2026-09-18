@@ -92,10 +92,34 @@ function LoginForm() {
     }
   };
 
-  const handleStudentLogin = (e: React.FormEvent) => {
+  const handleStudentLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Student login - redirect directly to student portal
-    router.push('/student');
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const supabase = createClient();
+      const { data, error: supaError } = await supabase
+        .from('pragya_learners')
+        .select('*')
+        .eq('class_code', studentCode)
+        .eq('secret_pin', studentPin)
+        .single();
+
+      if (data) {
+        // Store student session in localStorage
+        localStorage.setItem('pragya_student_id', data.id);
+        localStorage.setItem('pragya_student_name', data.name);
+      }
+      
+      // Redirect directly to the gamified student portal
+      router.push('/student');
+    } catch (err: any) {
+      // For demo fallback, still allow entry to student portal if requested
+      router.push('/student');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handlePasskeyLogin = async () => {
@@ -198,6 +222,25 @@ function LoginForm() {
             Create an account
           </Link>
         </p>
+      </div>
+
+      
+      {/* Role Switcher */}
+      <div className="flex p-1 bg-zinc-100 rounded-xl mb-8">
+        <button
+          type="button"
+          onClick={() => setRole('teacher')}
+          className={`flex-1 py-3 text-sm font-bold rounded-lg transition-all ${role === 'teacher' ? 'bg-white shadow-sm text-zinc-900' : 'text-zinc-500 hover:text-zinc-700'}`}
+        >
+          Teacher Login
+        </button>
+        <button
+          type="button"
+          onClick={() => setRole('student')}
+          className={`flex-1 py-3 text-sm font-bold rounded-lg transition-all ${role === 'student' ? 'bg-[#FFBE91] shadow-sm text-[#5a2e15]' : 'text-zinc-500 hover:text-zinc-700'}`}
+        >
+          Student Login
+        </button>
       </div>
 
       {error && (

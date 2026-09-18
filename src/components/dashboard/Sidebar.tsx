@@ -59,9 +59,9 @@ export default function Sidebar({ userEmail }: SidebarProps) {
     { name: 'Student Portal',            href: '/student',         icon: Award },
     { name: 'Classroom Map',          href: '/notes',           icon: FileText },
     { name: 'Assessment Engine',                 href: '/quiz',            icon: HelpCircle },
-    { name: 'Teacher Copilot',    href: '/interview',       icon: Mic },
+    // { name: 'Teacher Copilot',    href: '/interview',       icon: Mic },
     { name: 'Learning DNA',      href: '/career-guidance', icon: GraduationCap },
-    { name: 'Security Settings',    href: '/settings',        icon: Shield }
+    // { name: 'Security Settings',    href: '/settings',        icon: Shield }
   ];
 
   const displayName = userEmail.split('@')[0].toUpperCase();
