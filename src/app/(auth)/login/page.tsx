@@ -92,10 +92,34 @@ function LoginForm() {
     }
   };
 
-  const handleStudentLogin = (e: React.FormEvent) => {
+  const handleStudentLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Mock student login - redirect to assessment
-    router.push('/dashboard');
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const supabase = createClient();
+      const { data, error: supaError } = await supabase
+        .from('pragya_learners')
+        .select('*')
+        .eq('class_code', studentCode)
+        .eq('secret_pin', studentPin)
+        .single();
+
+      if (supaError || !data) {
+        throw new Error('Invalid Class Code or PIN');
+      }
+
+      // Store student session in localStorage
+      localStorage.setItem('pragya_student_id', data.id);
+      localStorage.setItem('pragya_student_name', data.name);
+      
+      router.push('/quiz/take');
+    } catch (err: any) {
+      setError(err.message || 'Login failed. Ask your teacher for the correct PIN.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handlePasskeyLogin = async () => {
