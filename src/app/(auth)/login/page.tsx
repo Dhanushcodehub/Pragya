@@ -200,6 +200,25 @@ function LoginForm() {
         </p>
       </div>
 
+      
+      {/* Role Switcher */}
+      <div className="flex p-1 bg-zinc-100 rounded-xl mb-8">
+        <button
+          type="button"
+          onClick={() => setRole('teacher')}
+          className={`flex-1 py-3 text-sm font-bold rounded-lg transition-all ${role === 'teacher' ? 'bg-white shadow-sm text-zinc-900' : 'text-zinc-500 hover:text-zinc-700'}`}
+        >
+          Teacher Login
+        </button>
+        <button
+          type="button"
+          onClick={() => setRole('student')}
+          className={`flex-1 py-3 text-sm font-bold rounded-lg transition-all ${role === 'student' ? 'bg-[#FFBE91] shadow-sm text-[#5a2e15]' : 'text-zinc-500 hover:text-zinc-700'}`}
+        >
+          Student Login
+        </button>
+      </div>
+
       {error && (
         <div
           className="text-xs p-3.5 rounded-xl flex items-start gap-2.5"
