@@ -44,9 +44,9 @@ export default function DashboardClient({ userEmail }: DashboardClientProps) {
     // If no classroom exists, create one implicitly
     if (!classData) {
       const { data: newClass } = await supabase.from('pragya_classrooms').insert({
-        name: "My Awesome Class",
+        name: "Class 5A",
         teacher_id: user.id,
-        grade_level: "Grade 1"
+        grade_level: "Grade 5"
       }).select().single();
       classData = newClass;
     }
@@ -55,74 +55,61 @@ export default function DashboardClient({ userEmail }: DashboardClientProps) {
     if (classData) {
       // 3. Fetch learners for this classroom
       const { data: learnersData } = await supabase.from('pragya_learners').select('*').eq('classroom_id', classData.id);
-      if (learnersData) setLearners(learnersData);
+      if (learnersData && learnersData.length >= 10) {
+        setLearners(learnersData);
+      } else {
+        await generateDemoDataForClass(classData.id);
+      }
     }
     setLoading(false);
   };
 
-  const generateDemoData = async () => {
-    if (!classroom) return;
-    setLoading(true);
-    
-    // Exactly 20 distinct names and varied avatars to prevent duplication
+  const generateDemoDataForClass = async (classId: string) => {
+    const localAvatars = [
+      '/avatars/boy_1.jpg',
+      '/avatars/boy_2.png',
+      '/avatars/girl_1.png',
+    ];
+
     const uniqueStudents = [
-      { name: 'Aarav Patel', avatar: '/avatars/boy_1.jpg', isBoy: true },
-      { name: 'Vihaan Sharma', avatar: '/avatars/boy_2.png', isBoy: true },
-      { name: 'Diya Gupta', avatar: '/avatars/girl_1.png', isBoy: false },
-      { name: 'Arjun Singh', avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Arjun&backgroundColor=b6e3f4&hair=full&skin=b88062', isBoy: true },
-      { name: 'Saanvi Reddy', avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Saanvi&backgroundColor=fef08a&hair=turban&skin=d9a38f', isBoy: false },
-      { name: 'Aditya Kumar', avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Aditya&backgroundColor=fed7aa&hair=fonze&skin=795842', isBoy: true },
-      { name: 'Ananya Bose', avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Ananya&backgroundColor=d1d4f9&hair=pixie&skin=b88062', isBoy: false },
-      { name: 'Vivaan Das', avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Vivaan&backgroundColor=b6e3f4&hair=mrT&skin=795842', isBoy: true },
-      { name: 'Kiara Jain', avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Kiara&backgroundColor=bbf7d0&hair=full&skin=e9c8bc', isBoy: false },
-      { name: 'Kabir Menon', avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Kabir&backgroundColor=c0aede&hair=mrClean&skin=b88062', isBoy: true },
-      { name: 'Aadhya Iyer', avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Aadhya&backgroundColor=fef08a&hair=pixie&skin=795842', isBoy: false },
-      { name: 'Rohan Nair', avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Rohan&backgroundColor=b6e3f4&hair=fonze&skin=b88062', isBoy: true },
-      { name: 'Maya Pillai', avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Maya&backgroundColor=fed7aa&hair=full&skin=d9a38f', isBoy: false },
-      { name: 'Sai Desai', avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Sai&backgroundColor=d1d4f9&hair=turban&skin=b88062', isBoy: true },
-      { name: 'Ira Varma', avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Ira&backgroundColor=bbf7d0&hair=pixie&skin=b88062', isBoy: false },
-      { name: 'Krishna Joshi', avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Krishna&backgroundColor=b6e3f4&hair=full&skin=795842', isBoy: true },
-      { name: 'Myra Bhat', avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Myra&backgroundColor=fef08a&hair=turban&skin=d9a38f', isBoy: false },
-      { name: 'Ishaan Rao', avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Ishaan&backgroundColor=fed7aa&hair=fonze&skin=b88062', isBoy: true },
-      { name: 'Priya Mistry', avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Priya&backgroundColor=c0aede&hair=pixie&skin=e9c8bc', isBoy: false },
-      { name: 'Kiran Ahluwalia', avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Kiran&backgroundColor=bbf7d0&hair=full&skin=795842', isBoy: true },
+      { name: 'Sai Patel', avatar: '/avatars/boy_1.jpg', pin: '4387', status: 'needs-support', reading: 'beginner', math: 'number-recognition-1-9' },
+      { name: 'Arjun Patel', avatar: '/avatars/boy_2.png', pin: '3098', status: 'developing', reading: 'word', math: 'subtraction' },
+      { name: 'Kiara Bose', avatar: '/avatars/girl_1.png', pin: '4695', status: 'needs-support', reading: 'beginner', math: 'number-recognition-1-9' },
+      { name: 'Kiara Bose', avatar: '/avatars/girl_1.png', pin: '3183', status: 'developing', reading: 'paragraph', math: 'number-recognition-11-99' },
+      { name: 'Saanvi Gupta', avatar: '/avatars/girl_1.png', pin: '5274', status: 'developing', reading: 'word', math: 'subtraction' },
+      { name: 'Priya Singh', avatar: '/avatars/girl_1.png', pin: '4541', status: 'developing', reading: 'word', math: 'subtraction' },
+      { name: 'Kabir Das', avatar: '/avatars/boy_1.jpg', pin: '9395', status: 'developing', reading: 'paragraph', math: 'subtraction' },
+      { name: 'Saanvi Reddy', avatar: '/avatars/girl_1.png', pin: '2082', status: 'secure', reading: 'story', math: 'division' },
+      { name: 'Sai Bose', avatar: '/avatars/boy_2.png', pin: '1109', status: 'needs-support', reading: 'letter', math: 'number-recognition-1-9' },
+      { name: 'Aadhya Sharma', avatar: '/avatars/girl_1.png', pin: '8821', status: 'developing', reading: 'word', math: 'number-recognition-11-99' },
+      { name: 'Arjun Kumar', avatar: '/avatars/boy_1.jpg', pin: '6402', status: 'developing', reading: 'paragraph', math: 'subtraction' },
+      { name: 'Sai Reddy', avatar: '/avatars/boy_2.png', pin: '7731', status: 'secure', reading: 'story', math: 'division' },
+      { name: 'Arjun Reddy', avatar: '/avatars/boy_1.jpg', pin: '5510', status: 'developing', reading: 'word', math: 'number-recognition-11-99' },
+      { name: 'Vivaan Das', avatar: '/avatars/boy_2.png', pin: '4412', status: 'secure', reading: 'story', math: 'division' },
+      { name: 'Diya Gupta', avatar: '/avatars/girl_1.png', pin: '8831', status: 'secure', reading: 'story', math: 'division' },
+      { name: 'Aditya Kumar', avatar: '/avatars/boy_1.jpg', pin: '2291', status: 'secure', reading: 'story', math: 'division' },
+      { name: 'Ananya Bose', avatar: '/avatars/girl_1.png', pin: '9012', status: 'developing', reading: 'paragraph', math: 'subtraction' },
+      { name: 'Rohan Nair', avatar: '/avatars/boy_2.png', pin: '3341', status: 'needs-support', reading: 'letter', math: 'number-recognition-1-9' },
+      { name: 'Myra Bhat', avatar: '/avatars/girl_1.png', pin: '7102', status: 'secure', reading: 'story', math: 'division' },
+      { name: 'Ishaan Rao', avatar: '/avatars/boy_1.jpg', pin: '4491', status: 'secure', reading: 'story', math: 'division' },
     ];
     
-    const demoStudents: any[] = [];
-    
-    uniqueStudents.forEach((student, i) => {
-        // Deterministic balanced stats distribution
-        let status = 'secure';
-        let reading_level = 'story';
-        let numeracy_level = 'division';
-        
-        if (i % 5 === 0) {
-            status = 'needs-support';
-            reading_level = i % 2 === 0 ? 'beginner' : 'letter';
-            numeracy_level = i % 2 === 0 ? 'beginner' : 'number-recognition-1-9';
-        } else if (i % 2 !== 0) {
-            status = 'developing';
-            reading_level = i % 3 === 0 ? 'word' : 'paragraph';
-            numeracy_level = i % 3 === 0 ? 'number-recognition-11-99' : 'subtraction';
-        }
-        
-        demoStudents.push({
-            classroom_id: classroom.id, 
-            name: student.name, 
-            avatar_emoji: student.avatar, 
-            class_code: `DEMO${(i + 1).toString().padStart(2, '0')}`, 
-            secret_pin: Math.floor(1000 + Math.random() * 9000).toString(), 
-            reading_level, 
-            numeracy_level, 
-            status
-        });
-    });
+    const demoStudents = uniqueStudents.map((s, i) => ({
+      classroom_id: classId,
+      name: s.name,
+      avatar_emoji: s.avatar,
+      class_code: `CLASS5A-${(i + 1).toString().padStart(2, '0')}`,
+      secret_pin: s.pin,
+      reading_level: s.reading,
+      numeracy_level: s.math,
+      status: s.status,
+    }));
 
-    // Wipe old demo data to fix broken avatars if any
-    await supabase.from('pragya_learners').delete().eq('classroom_id', classroom.id);
-    await supabase.from('pragya_learners').insert(demoStudents);
-    await fetchData();
+    await supabase.from('pragya_learners').delete().eq('classroom_id', classId);
+    const { data } = await supabase.from('pragya_learners').insert(demoStudents).select();
+    if (data) setLearners(data);
   };
+
 
   const handleCreateStudent = async (e: React.FormEvent) => {
     e.preventDefault();

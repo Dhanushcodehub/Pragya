@@ -20,15 +20,16 @@ export default async function UploadPage() {
       <Sidebar userEmail={user.email!} />
 
       {/* Main Dashboard space */}
-      <main className="flex-1 overflow-y-auto p-8 md:p-12 relative flex">
+      <main className="flex-1 overflow-y-auto p-4 sm:p-8 md:p-10 relative flex justify-center items-start">
         {/* Decorative background blobs */}
         <div className="absolute top-0 right-1/4 w-[300px] h-[300px] rounded-full blur-[80px] pointer-events-none" style={{ backgroundColor: 'rgba(190,198,224,0.15)' }} />
         <div className="absolute bottom-1/4 left-1/3 w-[250px] h-[250px] rounded-full blur-[80px] pointer-events-none" style={{ backgroundColor: 'rgba(255,226,76,0.1)' }} />
         
-        <div className="max-w-7xl mx-auto w-full z-10 relative flex flex-col">
+        <div className="max-w-6xl mx-auto w-full z-10 relative flex flex-col mb-12">
           <UploadClient />
         </div>
       </main>
     </div>
   );
 }
+

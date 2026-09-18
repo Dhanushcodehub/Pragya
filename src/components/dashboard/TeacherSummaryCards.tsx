@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import React from 'react';
 import { Users, CheckCircle, AlertTriangle, TrendingUp } from 'lucide-react';
 import type { PragyaLearner } from '@/lib/types';
