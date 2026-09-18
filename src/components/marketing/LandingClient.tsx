@@ -607,7 +607,7 @@ function ProblemSection() {
             { emoji: '👥', title: '40', desc: 'learners in one Class 5 room — all stamped the same grade' },
             { emoji: '📖', title: '1', desc: 'textbook, one lesson, one pace — for children 3 levels apart' },
             { emoji: '❓', title: '0', desc: 'at-a-glance sight of real reading levels at term start' },
-          ].map(({ emoji, title, desc, source }, idx) => (
+          ].map(({ emoji, title, desc }, idx) => (
             <motion.div
               key={title + idx}
               initial={{ opacity: 0, scale: 0.95 }}
@@ -621,12 +621,6 @@ function ProblemSection() {
               <div className="text-3xl">{emoji}</div>
               <div className="text-4xl font-extrabold" style={{ color: C.primary }}>{title}</div>
               <p className="text-sm leading-relaxed flex-1" style={{ color: C.onSurfaceVariant }}>{desc}</p>
-              <span
-                className="self-start text-[11px] font-bold px-2 py-0.5 rounded-md mt-1"
-                style={{ backgroundColor: `${C.accentPurple}22`, color: C.accentPurple, fontFamily: 'monospace' }}
-              >
-                {source}
-              </span>
             </motion.div>
           ))}
         </div>

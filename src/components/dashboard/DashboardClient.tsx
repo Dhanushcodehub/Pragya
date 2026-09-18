@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
@@ -17,6 +17,15 @@ export default function DashboardClient({ userEmail }: DashboardClientProps) {
   const [learners, setLearners] = useState<PragyaLearner[]>([]);
   const [classroom, setClassroom] = useState<PragyaClassroom | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  
+  // New Student Form State
+  const [newStudentName, setNewStudentName] = useState('');
+  const [newStudentUsername, setNewStudentUsername] = useState('');
+  const [newStudentPassword, setNewStudentPassword] = useState('');
+  const [newStudentGender, setNewStudentGender] = useState<'boy' | 'girl'>('boy');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const supabase = createClient();
 
   useEffect(() => {
@@ -55,16 +64,103 @@ export default function DashboardClient({ userEmail }: DashboardClientProps) {
     if (!classroom) return;
     setLoading(true);
     
-    const demoStudents = [
-      { classroom_id: classroom.id, name: 'Aarav Patel', avatar_emoji: 'ðŸ‘¦', class_code: 'DEMO', secret_pin: '1234', reading_level: 'word', numeracy_level: 'number-recognition-1-9', status: 'developing' },
-      { classroom_id: classroom.id, name: 'Diya Sharma', avatar_emoji: 'ðŸ‘§', class_code: 'DEMO', secret_pin: '5678', reading_level: 'paragraph', numeracy_level: 'subtraction', status: 'secure' },
-      { classroom_id: classroom.id, name: 'Rohan Gupta', avatar_emoji: 'ðŸ‘¦', class_code: 'DEMO', secret_pin: '9999', reading_level: 'letter', numeracy_level: 'beginner', status: 'needs-support' },
-      { classroom_id: classroom.id, name: 'Maya Singh', avatar_emoji: 'ðŸ‘§', class_code: 'DEMO', secret_pin: '1111', reading_level: 'story', numeracy_level: 'division', status: 'secure' },
-      { classroom_id: classroom.id, name: 'Kabir Khan', avatar_emoji: 'ðŸ‘¦', class_code: 'DEMO', secret_pin: '2222', reading_level: 'beginner', numeracy_level: 'beginner', status: 'needs-support' },
+    // Exactly 20 distinct names and varied avatars to prevent duplication
+    const uniqueStudents = [
+      { name: 'Aarav Patel', avatar: '/avatars/boy_1.jpg', isBoy: true },
+      { name: 'Vihaan Sharma', avatar: '/avatars/boy_2.png', isBoy: true },
+      { name: 'Diya Gupta', avatar: '/avatars/girl_1.png', isBoy: false },
+      { name: 'Arjun Singh', avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Arjun&backgroundColor=b6e3f4&hair=full&skin=b88062', isBoy: true },
+      { name: 'Saanvi Reddy', avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Saanvi&backgroundColor=fef08a&hair=turban&skin=d9a38f', isBoy: false },
+      { name: 'Aditya Kumar', avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Aditya&backgroundColor=fed7aa&hair=fonze&skin=795842', isBoy: true },
+      { name: 'Ananya Bose', avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Ananya&backgroundColor=d1d4f9&hair=pixie&skin=b88062', isBoy: false },
+      { name: 'Vivaan Das', avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Vivaan&backgroundColor=b6e3f4&hair=mrT&skin=795842', isBoy: true },
+      { name: 'Kiara Jain', avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Kiara&backgroundColor=bbf7d0&hair=full&skin=e9c8bc', isBoy: false },
+      { name: 'Kabir Menon', avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Kabir&backgroundColor=c0aede&hair=mrClean&skin=b88062', isBoy: true },
+      { name: 'Aadhya Iyer', avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Aadhya&backgroundColor=fef08a&hair=pixie&skin=795842', isBoy: false },
+      { name: 'Rohan Nair', avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Rohan&backgroundColor=b6e3f4&hair=fonze&skin=b88062', isBoy: true },
+      { name: 'Maya Pillai', avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Maya&backgroundColor=fed7aa&hair=full&skin=d9a38f', isBoy: false },
+      { name: 'Sai Desai', avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Sai&backgroundColor=d1d4f9&hair=turban&skin=b88062', isBoy: true },
+      { name: 'Ira Varma', avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Ira&backgroundColor=bbf7d0&hair=pixie&skin=b88062', isBoy: false },
+      { name: 'Krishna Joshi', avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Krishna&backgroundColor=b6e3f4&hair=full&skin=795842', isBoy: true },
+      { name: 'Myra Bhat', avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Myra&backgroundColor=fef08a&hair=turban&skin=d9a38f', isBoy: false },
+      { name: 'Ishaan Rao', avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Ishaan&backgroundColor=fed7aa&hair=fonze&skin=b88062', isBoy: true },
+      { name: 'Priya Mistry', avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Priya&backgroundColor=c0aede&hair=pixie&skin=e9c8bc', isBoy: false },
+      { name: 'Kiran Ahluwalia', avatar: 'https://api.dicebear.com/8.x/micah/svg?seed=Kiran&backgroundColor=bbf7d0&hair=full&skin=795842', isBoy: true },
     ];
+    
+    const demoStudents: any[] = [];
+    
+    uniqueStudents.forEach((student, i) => {
+        // Deterministic balanced stats distribution
+        let status = 'secure';
+        let reading_level = 'story';
+        let numeracy_level = 'division';
+        
+        if (i % 5 === 0) {
+            status = 'needs-support';
+            reading_level = i % 2 === 0 ? 'beginner' : 'letter';
+            numeracy_level = i % 2 === 0 ? 'beginner' : 'number-recognition-1-9';
+        } else if (i % 2 !== 0) {
+            status = 'developing';
+            reading_level = i % 3 === 0 ? 'word' : 'paragraph';
+            numeracy_level = i % 3 === 0 ? 'number-recognition-11-99' : 'subtraction';
+        }
+        
+        demoStudents.push({
+            classroom_id: classroom.id, 
+            name: student.name, 
+            avatar_emoji: student.avatar, 
+            class_code: `DEMO${(i + 1).toString().padStart(2, '0')}`, 
+            secret_pin: Math.floor(1000 + Math.random() * 9000).toString(), 
+            reading_level, 
+            numeracy_level, 
+            status
+        });
+    });
 
+    // Wipe old demo data to fix broken avatars if any
+    await supabase.from('pragya_learners').delete().eq('classroom_id', classroom.id);
     await supabase.from('pragya_learners').insert(demoStudents);
     await fetchData();
+  };
+
+  const handleCreateStudent = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!classroom || !newStudentName || !newStudentUsername || !newStudentPassword) return;
+    
+    setIsSubmitting(true);
+    
+    // Assign an avatar based on selection
+    const avatar = newStudentGender === 'boy' 
+      ? ['/avatars/boy_1.jpg', '/avatars/boy_2.png'][Math.floor(Math.random() * 2)]
+      : '/avatars/girl_1.png';
+
+    const { error } = await supabase.from('pragya_learners').insert({
+      classroom_id: classroom.id,
+      name: newStudentName,
+      class_code: newStudentUsername, // This acts as the Student ID
+      secret_pin: newStudentPassword,
+      avatar_emoji: avatar,
+      reading_level: 'not-assessed',
+      numeracy_level: 'not-assessed',
+      status: 'developing' // Default status
+    });
+
+    setIsSubmitting(false);
+
+    if (!error) {
+      setIsCreateModalOpen(false);
+      
+      // Reset form
+      setNewStudentName('');
+      setNewStudentUsername('');
+      setNewStudentPassword('');
+      
+      // Refresh the grid
+      fetchData();
+    } else {
+      alert('Error creating student ID.');
+    }
   };
 
   if (loading) {
@@ -78,11 +174,9 @@ export default function DashboardClient({ userEmail }: DashboardClientProps) {
           <h1 className="text-4xl font-extrabold text-zinc-900 font-heading mb-2">Teacher Dashboard</h1>
           <p className="text-zinc-500 font-medium">Welcome back! Here is {classroom?.name}'s learning DNA for today.</p>
         </div>
-        {learners.length === 0 && (
-          <button onClick={generateDemoData} className="px-4 py-2 bg-zinc-900 text-white rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-zinc-800">
-            <PlusCircle className="w-4 h-4"/> Generate Demo Students
-          </button>
-        )}
+        <button onClick={() => setIsCreateModalOpen(true)} className="px-4 py-2 bg-zinc-900 text-white rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-zinc-800 transition-all shrink-0">
+          <PlusCircle className="w-4 h-4"/> Create Student ID
+        </button>
       </div>
 
       <TeacherSummaryCards learners={learners} />
@@ -93,6 +187,52 @@ export default function DashboardClient({ userEmail }: DashboardClientProps) {
         <NextActionPanel learners={learners} />
         <InstructionalGroups learners={learners} />
       </div>
+
+      {/* Create Student Modal Overlay */}
+      {isCreateModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-zinc-900/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-xl border border-zinc-200 w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-zinc-100 flex justify-between items-center bg-zinc-50/50">
+              <h2 className="text-xl font-bold text-zinc-900 font-heading">Provision Student Account</h2>
+              <button onClick={() => setIsCreateModalOpen(false)} className="text-zinc-400 hover:text-zinc-600">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            
+            <form onSubmit={handleCreateStudent} className="p-6 space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-zinc-600 uppercase tracking-wider mb-1.5">Full Name</label>
+                <input required type="text" value={newStudentName} onChange={e => setNewStudentName(e.target.value)} placeholder="e.g. Arjun Patel" className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 bg-zinc-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all font-medium text-zinc-900" />
+              </div>
+              
+              <div>
+                <label className="block text-xs font-bold text-zinc-600 uppercase tracking-wider mb-1.5">Student Username (ID)</label>
+                <input required type="text" value={newStudentUsername} onChange={e => setNewStudentUsername(e.target.value)} placeholder="e.g. arjun2026" className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 bg-zinc-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all font-medium text-zinc-900" />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-zinc-600 uppercase tracking-wider mb-1.5">Password (PIN)</label>
+                <input required type="text" value={newStudentPassword} onChange={e => setNewStudentPassword(e.target.value)} placeholder="e.g. 1234" className="w-full px-4 py-2.5 rounded-xl border border-zinc-200 bg-zinc-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500/50 transition-all font-medium text-zinc-900" />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-zinc-600 uppercase tracking-wider mb-2">Avatar Profile</label>
+                <div className="flex gap-3">
+                  <button type="button" onClick={() => setNewStudentGender('boy')} className={`flex-1 py-2 px-3 rounded-xl border text-sm font-bold transition-all ${newStudentGender === 'boy' ? 'border-orange-500 bg-orange-50 text-orange-700 shadow-sm' : 'border-zinc-200 bg-white text-zinc-500'}`}>Boy</button>
+                  <button type="button" onClick={() => setNewStudentGender('girl')} className={`flex-1 py-2 px-3 rounded-xl border text-sm font-bold transition-all ${newStudentGender === 'girl' ? 'border-orange-500 bg-orange-50 text-orange-700 shadow-sm' : 'border-zinc-200 bg-white text-zinc-500'}`}>Girl</button>
+                </div>
+              </div>
+              
+              <div className="pt-4 mt-2 border-t border-zinc-100 flex justify-end gap-3">
+                <button type="button" onClick={() => setIsCreateModalOpen(false)} className="px-5 py-2.5 rounded-xl text-sm font-bold text-zinc-600 hover:bg-zinc-100 transition-colors">Cancel</button>
+                <button type="submit" disabled={isSubmitting} className="px-5 py-2.5 rounded-xl text-sm font-bold bg-zinc-900 text-white hover:bg-zinc-800 disabled:opacity-70 transition-all shadow-md">
+                  {isSubmitting ? 'Creating...' : 'Create Account'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

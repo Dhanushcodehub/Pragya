@@ -1,9 +1,9 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { LogOut, Award, Compass, HelpCircle, GraduationCap, FileText } from 'lucide-react';
+import { LogOut, Award, Compass, HelpCircle, GraduationCap, FileText, Upload } from 'lucide-react';
 import { signOutAction } from '@/app/auth/actions';
 
 // ─── Colour constants matching the landing page design system ──────────────
@@ -40,18 +40,20 @@ export default function Sidebar({ userEmail }: SidebarProps) {
   };
 
   const navItems = [
-    { name: 'Learning DNA',   href: '/career-guidance', icon: GraduationCap },
+    { name: 'Upload Materials',   href: '/upload', icon: Upload },
   ];
 
   const displayName = userEmail.split('@')[0].toUpperCase();
 
+  useEffect(() => {
+    const mainElement = document.querySelector('main');
+    if (mainElement) {
+      mainElement.style.paddingTop = '110px';
+    }
+  }, []);
+
   return (
     <>
-      <style dangerouslySetInnerHTML={{__html: `
-        /* Add top padding to the main element so content isn't hidden under the floating nav */
-        main { padding-top: 110px !important; }
-      `}} />
-
       {/* Desktop Floating Navbar */}
       <header 
         className="fixed top-6 left-1/2 -translate-x-1/2 z-50 rounded-full border shadow-xl flex items-center justify-between px-3 py-2 w-[95%] max-w-5xl transition-all"
