@@ -1,4 +1,4 @@
-# 🚀 NIPUN Intelligence — see the child, not the grade
+# 🚀 PRAGYA - NIPUN Intelligence — see the child, not the grade
 
 > **ASER-inspired, teacher-administered FLN diagnostic for PS-E01 (KALACHAKRA 2K26)**
 

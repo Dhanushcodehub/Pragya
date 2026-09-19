@@ -179,11 +179,11 @@ function LoginForm() {
     
     try {
       const supabase = createClient();
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+      const origin = typeof window !== 'undefined' ? window.location.origin : (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000');
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${appUrl}/auth/callback?next=${encodeURIComponent(nextPath)}`,
+          redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(nextPath)}`,
         },
       });
 
