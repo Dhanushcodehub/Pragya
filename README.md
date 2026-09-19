@@ -122,7 +122,7 @@ flowchart LR
 | **Diagnostic Kernel** | Deterministic adaptive & classification engine (`src/lib/nipun/`) |
 | **AI Assist** | Gemini API — explanation & copilot ONLY, never the classifier (with fallbacks) |
 | **Visualizations** | Recharts, Framer Motion, `@xyflow/react` |
-| *~~Vector Search / RAG~~* | *Pruned from MVP (out of scope for sub-skill diagnostic, PS-E01 §36)* |
+
 
 ---
 
