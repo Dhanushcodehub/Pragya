@@ -34,11 +34,11 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://focus-ai.app";
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
   title: {
-    default: "PRAGYA — Orchestrate the Future of Learning",
-    template: "%s | PRAGYA AI",
+    default: "NIPUN Intelligence — ASER-inspired foundational learning diagnostic",
+    template: "%s | NIPUN Intelligence",
   },
   description:
-    "PRAGYA dynamically coordinates specialist AI agents powered by Gemini to research, design, and generate complete personalised learning experiences from a single prompt.",
+    "A teacher-led, sub-skill adaptive diagnostic that reveals each child's actual reading/numeracy level and turns it into an immediate, non-ranking classroom action plan. Independent prototype; not affiliated with ASER, Pratham, NCERT, or NIPUN Bharat.",
   keywords: [
     "AI learning platform",
     "multi-agent AI",

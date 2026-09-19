@@ -1,5 +1,6 @@
 /**
- * PRAGYA Quiz Module — Grading Engine
+ * NIPUN: this engine is invoked by the teacher Conductor, never by the learner screen.
+ * PRAGYA / NIPUN Quiz Module — Grading Engine
  * Pure utility functions for answer checking and quiz scoring.
  */
 

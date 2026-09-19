@@ -40,7 +40,9 @@ export default function Sidebar({ userEmail }: SidebarProps) {
   };
 
   const navItems = [
-    { name: 'Upload Materials',   href: '/upload', icon: Upload },
+    { name: 'Command Center', href: '/dashboard', icon: GraduationCap },
+    { name: 'Classroom Map', href: '/dashboard', icon: Compass },
+    { name: 'Upload Materials', href: '/upload', icon: Upload },
   ];
 
   const displayName = userEmail.split('@')[0].toUpperCase();
@@ -66,7 +68,7 @@ export default function Sidebar({ userEmail }: SidebarProps) {
         {/* Logo */}
         <Link href="/dashboard" className="hidden sm:flex items-center pl-4 pr-6 border-r" style={{ borderColor: C.surfaceVariant }}>
           <span className="text-xl font-bold tracking-tight" style={{ color: C.primary, fontFamily: 'var(--font-fredoka), sans-serif' }}>
-            Pragya
+            NIPUN Intelligence
           </span>
         </Link>
         
