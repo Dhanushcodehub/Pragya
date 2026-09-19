@@ -86,19 +86,45 @@ export default function PracticeZone() {
     return idx >= 0 ? idx : 0;
   };
 
+  const [subDifficulty, setSubDifficulty] = useState<'easy' | 'medium' | 'hard'>('medium');
   const [levelIdx, setLevelIdx] = useState(getInitialLevelIdx());
   const [streak, setStreak] = useState(0);
   const [attemptedIds, setAttemptedIds] = useState<string[]>([]);
   const [questionsAnswered, setQuestionsAnswered] = useState(0);
   const [adaptiveBanner, setAdaptiveBanner] = useState<string | null>('✨ Adaptive Quest: Adapting difficulty to your skills!');
-  
+
+  const getNextAdaptiveQuestion = (targetLevelIdx: number, diff: 'easy' | 'medium' | 'hard', usedIds: string[]): NcertQuestion => {
+    const targetLevel = ladder[targetLevelIdx];
+    const pathwayBank = NCERT_CLASS_3_QUESTION_BANK.filter(q => q.pathway === pathwayParam);
+    
+    // Shuffle helper to randomize questions within any matched bucket
+    const shuffle = <T,>(arr: T[]): T[] => [...arr].sort(() => Math.random() - 0.5);
+
+    // 1. Unattempted questions matching exact sub-difficulty ('easy' | 'medium' | 'hard')
+    let candidates = pathwayBank.filter(q => (q.difficulty || 'medium') === diff && !usedIds.includes(q.id));
+    if (candidates.length > 0) return shuffle(candidates)[0];
+
+    // 2. Unattempted questions matching target ASER level
+    candidates = pathwayBank.filter(q => q.level === targetLevel && !usedIds.includes(q.id));
+    if (candidates.length > 0) return shuffle(candidates)[0];
+    
+    // 3. Any unattempted question in current pathway
+    candidates = pathwayBank.filter(q => !usedIds.includes(q.id));
+    if (candidates.length > 0) return shuffle(candidates)[0];
+
+    // 4. Fallback: Any question matching sub-difficulty (even if attempted before for continuous practice)
+    candidates = pathwayBank.filter(q => (q.difficulty || 'medium') === diff);
+    if (candidates.length > 0) return shuffle(candidates)[0];
+
+    // 5. Ultimate fallback: Random selection across pathway bank
+    return shuffle(pathwayBank)[0];
+  };
+
   const [currentQ, setCurrentQ] = useState<NcertQuestion>(() => {
-    const startLevel = ladder[getInitialLevelIdx()];
-    const pool = NCERT_CLASS_3_QUESTION_BANK.filter(q => q.pathway === pathwayParam && q.level === startLevel);
-    return pool[0] || NCERT_CLASS_3_QUESTION_BANK.filter(q => q.pathway === pathwayParam)[0];
+    return getNextAdaptiveQuestion(getInitialLevelIdx(), 'medium', []);
   });
 
-  // Early returns AFTER all hooks (rules-of-hooks: hook count must not change between renders)
+  // Early returns AFTER all hooks (rules-of-hooks)
   if (isLoading) return <div className="flex justify-center p-12"><Loader2 className="w-8 h-8 animate-spin text-amber-500" /></div>;
   if (!learner) return null;
 
@@ -157,9 +183,14 @@ export default function PracticeZone() {
       const newStreak = streak + 1;
       setStreak(newStreak);
 
+      // Increase sub-difficulty on right answer
+      if (subDifficulty === 'easy') setSubDifficulty('medium');
+      else if (subDifficulty === 'medium') setSubDifficulty('hard');
+
       if (newStreak >= 2 && levelIdx < ladder.length - 1) {
         const nextLvl = levelIdx + 1;
         setLevelIdx(nextLvl);
+        setSubDifficulty('medium');
         setStreak(0);
         const nextLevelKey = ladder[nextLvl];
         if (updateLevel) updateLevel(pathwayParam === 'numeracy' ? 'numeracy' : 'reading', nextLevelKey);
@@ -171,15 +202,21 @@ export default function PracticeZone() {
       }
     } else {
       setStreak(0);
-      if (levelIdx > 0) {
-        const lowerLvl = levelIdx - 1;
-        setLevelIdx(lowerLvl);
-        const lowerLevelKey = ladder[lowerLvl];
-        setAdaptiveBanner(`💡 Adaptive Assistance: Stepping back to ${levelLabels[lowerLevelKey]} to build your foundation!`);
-        handlePlayAudio(`Don't worry! Let's practice a simpler step to build your skills.`);
+      
+      // Retention Sub-Difficulty Fallback Loop
+      if (subDifficulty === 'hard') {
+        setSubDifficulty('medium');
+        setAdaptiveBanner(`💡 Retention Assist: Adjusting to Medium difficulty to help you solidify this concept!`);
+        handlePlayAudio(`Don't worry! Let's practice a medium-level challenge.`);
+      } else if (subDifficulty === 'medium') {
+        setSubDifficulty('easy');
+        const hintText = currentQ.hint ? ` Hint: ${currentQ.hint}` : '';
+        setAdaptiveBanner(`💡 Adaptive Retention: Stepping down to Easy step!${hintText}`);
+        handlePlayAudio(`No worries! Here is an easier question with a hint.`);
       } else {
-        setAdaptiveBanner(`💪 Good effort! Let us try another practice question together.`);
-        handlePlayAudio('Good try! Let us review the correct answer.');
+        // Already at easy, retain student at easy without penalizing further
+        setAdaptiveBanner(`💪 Great effort! Stay determined — practicing makes perfect!`);
+        handlePlayAudio('Good try! Practice makes perfect.');
       }
     }
   };
@@ -187,22 +224,6 @@ export default function PracticeZone() {
   const handleSubmitAnswer = () => {
     if (!selectedOption) return;
     submitSpecificAnswer(selectedOption);
-  };
-
-  const getNextAdaptiveQuestion = (targetLevelIdx: number, usedIds: string[]): NcertQuestion => {
-    const targetLevel = ladder[targetLevelIdx];
-    const pathwayBank = NCERT_CLASS_3_QUESTION_BANK.filter(q => q.pathway === pathwayParam);
-    
-    // 1. Unattempted questions at target level
-    let candidates = pathwayBank.filter(q => q.level === targetLevel && !usedIds.includes(q.id));
-    if (candidates.length > 0) return candidates[Math.floor(Math.random() * candidates.length)];
-    
-    // 2. Any unattempted questions in pathway
-    candidates = pathwayBank.filter(q => !usedIds.includes(q.id));
-    if (candidates.length > 0) return candidates[Math.floor(Math.random() * candidates.length)];
-
-    // 3. Fallback to any question in pathway
-    return pathwayBank[Math.floor(Math.random() * pathwayBank.length)];
   };
 
   const handleNextQuestion = () => {
@@ -213,7 +234,7 @@ export default function PracticeZone() {
     if (questionsAnswered >= 6) {
       setShowChallenge(true);
     } else {
-      const nextQ = getNextAdaptiveQuestion(levelIdx, [...attemptedIds, currentQ.id]);
+      const nextQ = getNextAdaptiveQuestion(levelIdx, subDifficulty, [...attemptedIds, currentQ.id]);
       setCurrentQ(nextQ);
     }
   };

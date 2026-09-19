@@ -10,6 +10,7 @@ interface StudentContextType {
   clearLevelUp: () => void;
   learner: Learner | null;
   isLoading: boolean;
+  isAuthenticated: boolean;
   addXp: (amount: number) => void;
   updateLevel: (subject: 'reading' | 'numeracy', newLevel: string) => Promise<void>;
 }
@@ -19,6 +20,7 @@ const StudentContext = createContext<StudentContextType>({
   clearLevelUp: () => {},
   learner: null,
   isLoading: true,
+  isAuthenticated: false,
   addXp: () => {},
   updateLevel: async () => {},
 });
@@ -141,7 +143,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <StudentContext.Provider value={{ learner, isLoading, addXp, updateLevel, levelUpData, clearLevelUp }}>
+    <StudentContext.Provider value={{ learner, isLoading, isAuthenticated: !!learner, addXp, updateLevel, levelUpData, clearLevelUp }}>
       {children}
     </StudentContext.Provider>
   );

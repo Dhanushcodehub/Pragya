@@ -9,7 +9,7 @@
  * (ncert.nic.in/textbook.php?cemm1=0-14 for Maths Mela).
  */
 
-import { PracticeQuestion, ReadingLevel, NumeracyLevel } from './types';
+import { PracticeQuestion, ReadingLevel, NumeracyLevel, QuestionDifficulty } from './types';
 import type { PragyaLearner } from '@/lib/types';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -77,6 +77,8 @@ const mq = (
   options: string[],
   correctAnswer: string,
   explanation: string,
+  difficulty: QuestionDifficulty = 'medium',
+  hint?: string,
   audioPrompt?: string
 ): NcertQuestion => ({
   id,
@@ -84,13 +86,15 @@ const mq = (
   level,
   subject: 'Maths Mela (Mathematics)',
   chapterNo,
-  chapterName: MATHS_MELA_CHAPTERS[chapterNo - 1].name,
+  chapterName: MATHS_MELA_CHAPTERS[chapterNo - 1]?.name || 'Maths Mela',
   content,
   audioPrompt: audioPrompt || content,
   options,
   correctAnswer,
   explanation,
-  xp: 25,
+  xp: difficulty === 'hard' ? 30 : difficulty === 'medium' ? 25 : 15,
+  difficulty,
+  hint,
 });
 
 const rq = (
@@ -101,6 +105,8 @@ const rq = (
   options: string[],
   correctAnswer: string,
   explanation: string,
+  difficulty: QuestionDifficulty = 'medium',
+  hint?: string,
   audioPrompt?: string
 ): NcertQuestion => ({
   id,
@@ -108,13 +114,15 @@ const rq = (
   level,
   subject: 'Santoor (English)',
   chapterNo,
-  chapterName: SANTOOR_CHAPTERS[chapterNo - 1].name,
+  chapterName: SANTOOR_CHAPTERS[chapterNo - 1]?.name || 'Santoor',
   content,
   audioPrompt: audioPrompt || content,
   options,
   correctAnswer,
   explanation,
-  xp: 20,
+  xp: difficulty === 'hard' ? 25 : difficulty === 'medium' ? 20 : 15,
+  difficulty,
+  hint,
 });
 
 /**
@@ -123,89 +131,125 @@ const rq = (
  * ASER-aligned per AGENTS.md; the CONTENT comes from the NCERT textbooks).
  */
 export const NCERT_CLASS_3_QUESTION_BANK: NcertQuestion[] = [
-  // ── MATHS · Number Recognition 1–9 (Ch 1, 2, 5, 11) ────────────────────────
-  mq('m-n1', 'number_1_9', 1, 'In the name "RIYA", how many letters are there?', ['4', '5', '3'], '4',
-     "R-I-Y-A has 4 letters — just like counting names in 'What's in a Name?'! 🔤"),
-  mq('m-n2', 'number_1_9', 1, 'What comes next in the pattern: 1, 2, 3, 4, ___?', ['5', '6', '3'], '5',
-     'Counting forward one by one: after 4 comes 5! 🎉'),
-  mq('m-n3', 'number_1_9', 2, 'How many corners does a triangle have?', ['3', '4', '0'], '3',
-     "A triangle has 3 straight sides and 3 corners — Toy Joy shapes! 📐"),
-  mq('m-n4', 'number_1_9', 2, 'Which shape has no corners at all?', ['Circle', 'Square', 'Triangle'], 'Circle',
-     "A circle is perfectly round — no corners, like a wheel! ⭕"),
-  mq('m-n5', 'number_1_9', 11, 'A watermelon is ______ than an apple.', ['Heavier', 'Lighter', 'Smaller'], 'Heavier',
-     "We compare weight in 'Filling and Lifting' — a watermelon is heavier! 🍉"),
+  // =========================================================================
+  // 🟢 MATHS EASY (15 QUESTIONS)
+  // =========================================================================
+  mq('m-ez-1', 'number_11_99', 6, 'What is the place value of 7 in 57,324?', ['70', '700', '7,000'], '7,000', '7 is in the thousands place, so its place value is 7,000! 🏠', 'easy', 'Count place values from right: ones, tens, hundreds, thousands.'),
+  mq('m-ez-2', 'number_11_99', 3, 'Which number is the greatest?', ['4,567', '4,765', '4,657'], '4,765', '4,765 has the largest hundreds digit (7)! 🔢', 'easy', 'Compare the hundreds digit after 4,000.'),
+  mq('m-ez-3', 'number_11_99', 4, 'Add: 2,345 + 1,234', ['3,579', '3,479', '3,589'], '3,579', '2345 + 1234 = 3,579! 🧮', 'easy', 'Add digits column by column from ones.'),
+  mq('m-ez-4', 'subtraction', 4, 'Subtract: 5,000 − 2,345', ['2,655', '2,755', '3,655'], '2,655', '5000 − 2345 = 2,655! 📉', 'easy', 'Regroup across zeros carefully.'),
+  mq('m-ez-5', 'number_11_99', 7, 'Multiply: 24 × 5', ['110', '120', '130'], '120', '24 × 5 = 120! ✖️', 'easy', 'Multiply 20 × 5 + 4 × 5.'),
+  mq('m-ez-6', 'division', 10, 'Divide: 72 ÷ 8', ['8', '9', '7'], '9', '72 ÷ 8 = 9 (since 8 × 9 = 72)! ➗', 'easy', 'Think: 8 times what equals 72?'),
+  mq('m-ez-7', 'number_11_99', 8, 'Which fraction represents one-half?', ['1/3', '1/4', '1/2'], '1/2', '1/2 represents 1 out of 2 equal parts! 🍕', 'easy', 'Half means dividing into 2 equal parts.'),
+  mq('m-ez-8', 'number_11_99', 8, 'What is 0.5 as a fraction?', ['1/2', '1/4', '3/4'], '1/2', '0.5 equals 5/10 which simplifies to 1/2! 🎯', 'easy', '0.5 means half.'),
+  mq('m-ez-9', 'number_11_99', 11, 'How many centimetres are there in 1 metre?', ['10 cm', '100 cm', '1000 cm'], '100 cm', '1 metre = 100 centimetres! 📏', 'easy', 'Centi means hundredth.'),
+  mq('m-ez-10', 'number_11_99', 13, 'How many minutes are there in 1 hour?', ['30', '50', '60'], '60', '1 hour = 60 minutes! ⏰', 'easy', 'Think of clock numbers: 5 × 12.'),
+  mq('m-ez-11', 'subtraction', 14, 'A pencil costs ₹10. How much do 3 pencils cost?', ['₹20', '₹30', '₹40'], '₹30', '3 × ₹10 = ₹30! ✏️', 'easy', 'Multiply ₹10 by 3.'),
+  mq('m-ez-12', 'number_1_9', 2, 'How many sides does a triangle have?', ['3', '4', '5'], '3', 'A triangle has 3 straight sides! 📐', 'easy', 'Tri means 3.'),
+  mq('m-ez-13', 'number_1_9', 1, 'Find the next number in pattern: 5, 10, 15, 20, ___', ['25', '30', '22'], '25', 'Skip counting forward by 5s: 20 + 5 = 25! 🚀', 'easy', 'Add 5 to 20.'),
+  mq('m-ez-14', 'number_11_99', 8, 'Which is greater? 3/4 or 1/4', ['3/4', '1/4', 'They are equal'], '3/4', '3 parts out of 4 is greater than 1 part out of 4! 🍰', 'easy', '3 numerator is larger than 1.'),
+  mq('m-ez-15', 'subtraction', 4, 'Rani has ₹50 and spends ₹20. How much money is left?', ['₹20', '₹30', '₹40'], '₹30', '₹50 − ₹20 = ₹30! 💵', 'easy', 'Subtract 20 from 50.'),
 
-  // ── MATHS · Number Recognition 11–99 (Ch 3, 6) ─────────────────────────────
-  mq('m-t1', 'number_11_99', 3, 'How many tens are there in 60?', ['6 tens', '60 tens', '10 tens'], '6 tens',
-     "60 = 6 bundles of ten — making numbers in 'Double Century'! 💯"),
-  mq('m-t2', 'number_11_99', 3, 'Which number comes just after 79?', ['80', '81', '70'], '80',
-     '79 and one more makes 80! 🔢'),
-  mq('m-t3', 'number_11_99', 3, '45 + 10 = ?', ['55', '65', '54'], '55',
-     "Adding one more ten to 45 gives 55 — Double Century maths! ➕"),
-  mq('m-t4', 'number_11_99', 6, 'In 68, which digit is in the tens place?', ['6', '8', '68'], '6',
-     "The first digit is the tens place — 'House of Hundreds' place value! 🏠"),
-  mq('m-t5', 'number_11_99', 6, 'Which is the biggest number?', ['100', '98', '89'], '100',
-     "100 is one hundred — the very first 3-digit number in 'House of Hundreds'! 🏆"),
+  // =========================================================================
+  // 🟡 MATHS MEDIUM (15 QUESTIONS)
+  // =========================================================================
+  mq('m-md-16', 'number_11_99', 6, 'Write 45,608 in expanded form.', ['40,000 + 5,000 + 600 + 8', '4,000 + 500 + 60 + 8', '45,000 + 608'], '40,000 + 5,000 + 600 + 8', '4 ten-thousands + 5 thousands + 6 hundreds + 8 ones! 💯', 'medium', 'Decompose by digit place values.'),
+  mq('m-md-17', 'number_11_99', 12, 'Calculate: 3,456 + 2,789', ['6,245', '6,145', '6,345'], '6,245', '3456 + 2789 = 6,245 with regrouping! 🧮', 'medium', 'Carry values over to next column.'),
+  mq('m-md-18', 'subtraction', 12, 'Calculate: 8,000 − 3,675', ['4,325', '4,425', '5,325'], '4,325', '8000 − 3675 = 4,325! 📉', 'medium', 'Borrow across zeros.'),
+  mq('m-md-19', 'division', 7, 'Calculate: 125 × 24', ['3,000', '2,800', '3,200'], '3,000', '125 × 24 = 3,000! ✖️', 'medium', '125 × 8 × 3 = 1000 × 3 = 3000.'),
+  mq('m-md-20', 'division', 10, 'Calculate: 864 ÷ 12', ['72', '68', '74'], '72', '864 ÷ 12 = 72! ➗', 'medium', '70 × 12 = 840, + 2 × 12 = 864.'),
+  mq('m-md-21', 'division', 10, 'A farmer has 245 mangoes and packs them equally into 5 boxes. How many in each box?', ['49', '45', '51'], '49', '245 ÷ 5 = 49 mangoes per box! 🥭', 'medium', 'Divide 245 by 5.'),
+  mq('m-md-22', 'number_11_99', 8, 'Add: 2/5 + 1/5', ['3/5', '3/10', '2/5'], '3/5', '2/5 + 1/5 = 3/5 (keep common denominator)! 🍰', 'medium', 'Add numerators 2 + 1.'),
+  mq('m-md-23', 'subtraction', 8, 'Subtract: 7/8 − 3/8', ['4/8 = 1/2', '3/8', '5/8'], '4/8 = 1/2', '7/8 − 3/8 = 4/8 which simplifies to 1/2! 🥧', 'medium', 'Subtract numerators: 7 - 3 = 4.'),
+  mq('m-md-24', 'number_11_99', 8, 'Which decimal is greater? 0.7 or 0.65', ['0.7', '0.65', 'They are equal'], '0.7', '0.7 = 0.70 which is greater than 0.65! 🎯', 'medium', 'Compare tenths digit: 7 is greater than 6.'),
+  mq('m-md-25', 'number_11_99', 11, 'Convert 2.5 metres into centimetres.', ['250 cm', '25 cm', '2500 cm'], '250 cm', '2.5 × 100 = 250 cm! 📏', 'medium', 'Multiply metres by 100.'),
+  mq('m-md-26', 'number_11_99', 13, 'A movie starts at 3:30 PM and ends at 5:15 PM. How long is the movie?', ['1 hour 45 minutes', '2 hours 15 minutes', '1 hour 30 minutes'], '1 hour 45 minutes', '3:30 to 4:30 is 1 hr + 45 min to 5:15 PM = 1h 45m! 🎬', 'medium', 'Count hours then remaining minutes.'),
+  mq('m-md-27', 'subtraction', 14, 'A notebook costs ₹45. Ravi buys 4 notebooks. How much does he pay?', ['₹180', '₹160', '₹200'], '₹180', '4 × ₹45 = ₹180! 📓', 'medium', 'Multiply 45 by 4.'),
+  mq('m-md-28', 'number_1_9', 2, 'Find the perimeter of a rectangle with length 8 cm and width 5 cm.', ['26 cm', '40 cm', '13 cm'], '26 cm', 'Perimeter = 2 × (8 + 5) = 26 cm! 🖼️', 'medium', 'Add all 4 sides: 8 + 5 + 8 + 5.'),
+  mq('m-md-29', 'number_1_9', 1, 'Complete the geometric doubling pattern: 3, 6, 12, 24, ___, ___', ['48, 96', '36, 48', '30, 36'], '48, 96', 'Doubling each number: 24 × 2 = 48, 48 × 2 = 96! 📈', 'medium', 'Multiply each term by 2.'),
+  mq('m-md-30', 'number_11_99', 14, 'Table: Apple (12), Mango (18), Banana (10), Orange (15). Which fruit is preferred most?', ['Mango', 'Apple', 'Orange'], 'Mango', 'Mango has the highest student count (18)! 🥭', 'medium', 'Look for the largest number in table.'),
 
-  // ── MATHS · Subtraction (Ch 4, 12) ─────────────────────────────────────────
-  mq('m-s1', 'subtraction', 4, 'Nani Maa had 23 mangoes. She gave 8 away. How many are left?', ['15', '16', '31'], '15',
-     "23 − 8 = 15 — sharing mangoes in 'Vacation with My Nani Maa'! 🥭"),
-  mq('m-s2', 'subtraction', 12, 'What is 54 − 27?', ['27', '37', '17'], '27',
-     "Regroup a ten first: 54 − 27 = 27 — 'Give and Take' borrowing! 🧮"),
-  mq('m-s3', 'subtraction', 12, 'A shop had 90 pencils. 45 were sold. How many are left?', ['45', '55', '35'], '45',
-     '90 − 45 = 45 pencils still on the shelf! ✏️'),
-  mq('m-s4', 'subtraction', 4, 'What is 100 − 60?', ['40', '50', '60'], '40',
-     'Take away 6 tens from 10 tens — 4 tens or 40 remain! 💪'),
+  // =========================================================================
+  // 🔴 MATHS HARD (15 QUESTIONS)
+  // =========================================================================
+  mq('m-hd-31', 'division', 10, 'A school has 1,248 students. If each bus carries 48 students, how many buses are needed?', ['26 buses', '24 buses', '28 buses'], '26 buses', '1248 ÷ 48 = 26 buses needed! 🚌', 'hard', 'Divide total students 1248 by 48.'),
+  mq('m-hd-32', 'subtraction', 4, 'Shopkeeper had 5,000 pencils, sold 2,375 and got 1,250 more. How many pencils now?', ['3,875', '3,775', '3,975'], '3,875', '5000 − 2375 = 2625; + 1250 = 3,875! ✏️', 'hard', 'Subtract sold then add received.'),
+  mq('m-hd-33', 'subtraction', 8, 'A farmer has 3/4 hectare land. He uses 1/4 hectare for rice. How much land is left?', ['1/2 hectare', '1/4 hectare', '2/3 hectare'], '1/2 hectare', '3/4 − 1/4 = 2/4 = 1/2 hectare left! 🌾', 'hard', 'Subtract fractions: 3/4 - 1/4 = 2/4 = 1/2.'),
+  mq('m-hd-34', 'number_11_99', 11, 'Riya drank 0.75 L water in morning and 0.50 L in afternoon. How much altogether?', ['1.25 litres', '1.15 litres', '1.35 litres'], '1.25 litres', '0.75 + 0.50 = 1.25 litres! 💧', 'hard', 'Add decimal amounts: 75 + 50 hundredths.'),
+  mq('m-hd-35', 'number_1_9', 2, 'A rectangular garden is 15 m long and 8 m wide. Find its perimeter.', ['46 m', '120 m', '23 m'], '46 m', 'Perimeter = 2 × (15 + 8) = 46 m! 🏡', 'hard', 'Perimeter formula = 2 × (length + width).'),
+  mq('m-hd-36', 'number_1_9', 2, 'A rectangular garden is 15 m long and 8 m wide. Find its area.', ['120 m²', '46 m²', '110 m²'], '120 m²', 'Area = length × width = 15 × 8 = 120 m²! 🟩', 'hard', 'Area formula = length × width.'),
+  mq('m-hd-37', 'number_11_99', 13, 'Train leaves at 8:45 AM and arrives at 1:20 PM. How long is the journey?', ['4 hours 35 minutes', '4 hours 15 minutes', '5 hours 25 minutes'], '4 hours 35 minutes', '8:45 AM to 12:45 PM (4 hrs) + 35 mins to 1:20 PM = 4h 35m! 🚂', 'hard', 'Calculate step-by-step elapsed time.'),
+  mq('m-hd-38', 'subtraction', 14, 'A book costs ₹275. Student gives ₹500 note. How much change returned?', ['₹225', '₹235', '₹215'], '₹225', '₹500 − ₹275 = ₹225! 💵', 'hard', 'Subtract 275 from 500.'),
+  mq('m-hd-39', 'division', 10, '36 students in class. 2/3 submitted homework. How many submitted?', ['24', '18', '28'], '24', '(36 ÷ 3) × 2 = 12 × 2 = 24 students! 📝', 'hard', 'Find 1/3 of 36 then multiply by 2.'),
+  mq('m-hd-40', 'subtraction', 11, 'Rope is 6.5 m long. A piece of 2.75 m is cut. How much rope remains?', ['3.75 metres', '3.85 metres', '3.65 metres'], '3.75 metres', '6.50 − 2.75 = 3.75 metres! 🧵', 'hard', 'Align decimals: 6.50 - 2.75.'),
+  mq('m-hd-41', 'division', 10, 'Find the missing number: □ × 15 = 450', ['30', '25', '35'], '30', '450 ÷ 15 = 30! 🧩', 'hard', 'Divide product 450 by 15.'),
+  mq('m-hd-42', 'subtraction', 14, 'Discount of ₹50 on school bag costing ₹650. What is final price?', ['₹600', '₹580', '₹610'], '₹600', '₹650 − ₹50 = ₹600! 🎒', 'hard', 'Subtract discount from original price.'),
+  mq('m-hd-43', 'subtraction', 11, 'Water tank has 2,500 L. Family uses 375 L daily. Water left after 4 days?', ['1,000 litres', '1,200 litres', '800 litres'], '1,000 litres', '4 × 375 = 1,500 L used; 2500 − 1500 = 1,000 L! 🚰', 'hard', 'Multiply daily usage by 4 then subtract.'),
+  mq('m-hd-44', 'subtraction', 14, 'Marks: Ravi(75), Anu(82), Meena(68), Arjun(95). Difference between highest & lowest?', ['27 marks', '25 marks', '30 marks'], '27 marks', 'Highest(95) − Lowest(68) = 27 marks! 📊', 'hard', 'Find max and min values then subtract.'),
+  mq('m-hd-45', 'division', 10, '156 students into rows of 12. If each row gets 2 extra chairs, total chairs needed?', ['182 chairs', '168 chairs', '194 chairs'], '182 chairs', '156 ÷ 12 = 13 rows; 13 × 2 = 26 extra chairs; 156 + 26 = 182 chairs! 🪑', 'hard', 'Multi-step problem: calculate rows, extra chairs & total.'),
 
-  // ── MATHS · Equal Groups & Division (Ch 7, 8, 10, 13, 14) ─────────────────
-  mq('m-d1', 'division', 10, '12 laddoos are shared equally among 4 children. How many does each get?', ['3', '4', '6'], '3',
-     "Sharing one by one: each child gets 3 — 'Fun at Class Party!' 🍬"),
-  mq('m-d2', 'division', 8, 'A roti is cut into 2 equal parts. Each part is called a…', ['Half', 'Quarter', 'Whole'], 'Half',
-     "Two equal parts make halves — fair sharing in 'Fair Share'! 🫓"),
-  mq('m-d3', 'division', 8, 'How many quarters make one whole?', ['4', '2', '3'], '4',
-     'Four equal quarters join to make a whole! 🎂'),
-  mq('m-d4', 'division', 7, 'Each plate has 5 rakhis. There are 4 plates. How many rakhis in all?', ['20', '25', '9'], '20',
-     "5 × 4 = 20 — equal groups in 'Raksha Bandhan'! 🎀"),
-  mq('m-d5', 'division', 13, 'How many days are there in one week?', ['7', '12', '30'], '7',
-     "Monday to Sunday — 7 days in 'Time Goes On'! 📅"),
-  mq('m-d6', 'division', 14, 'A toy costs ₹35 and a ball costs ₹20. How much money for both?', ['₹55', '₹45', '₹15'], '₹55',
-     '35 + 20 = 55 — adding money at the fair! 🛒'),
+  // =========================================================================
+  // 🟢 ENGLISH EASY (15 QUESTIONS)
+  // =========================================================================
+  rq('e-ez-1', 'letter', 1, 'Ravi has a blue bicycle. He rides it to the park every evening. What does Ravi have?', ['A red bicycle', 'A blue bicycle', 'A blue bag'], 'A blue bicycle', 'Ravi has a blue bicycle! 🚲', 'easy', 'Look at the sentence: "Ravi has a blue bicycle."'),
+  rq('e-ez-2', 'letter', 1, 'Where does Ravi ride his bicycle?', ['School', 'Market', 'Park'], 'Park', 'He rides it to the park every evening! 🏞️', 'easy', 'Read carefully: "rides it to the park"'),
+  rq('e-ez-3', 'letter', 1, 'Choose the word that rhymes with "cat":', ['Dog', 'Hat', 'Sun'], 'Hat', 'Cat and Hat rhyme with the same ending sound! 🎩', 'easy', 'Listen to the ending sound -at.'),
+  rq('e-ez-4', 'letter', 1, 'Choose the correctly spelled word:', ['Frend', 'Freind', 'Friend'], 'Friend', 'F-R-I-E-N-D is the correct spelling! 🤝', 'easy', 'Remember: i before e in friend.'),
+  rq('e-ez-5', 'letter', 1, 'What is the opposite of "hot"?', ['Warm', 'Cold', 'Big'], 'Cold', 'The opposite of hot is cold! ❄️', 'easy', 'Ice is hot or cold?'),
 
-  // ── ENGLISH · Letter & Word level (Santoor Ch 1, 4) ────────────────────────
-  rq('e-w1', 'letter', 1, 'Which word has 3 letters?', ['Sun', 'Rain', 'Cloud'], 'Sun',
-     "S-U-N has 3 letters — word work with 'Colours'! ☀️"),
-  rq('e-w2', 'letter', 1, 'Which colour word starts with the letter G?', ['Green', 'Red', 'Yellow'], 'Green',
-     "Green grows in the garden and starts with G! 🌿"),
-  rq('e-w3', 'letter', 1, 'Which word rhymes with "red"?', ['Bed', 'Tree', 'Moon'], 'Bed',
-     'Red and bed rhyme — same ending sound! 🛏️'),
-  rq('e-w4', 'word', 4, 'In the poem "Out in the Garden", where are the children playing?', ['In the garden', 'In the kitchen', 'On the roof'], 'In the garden',
-     "The poem takes us out in the garden to play! 🌸"),
+  rq('e-ez-6', 'word', 4, 'Complete the sentence: "The sun ___ in the east."', ['rise', 'rises', 'rising'], 'rises', 'The sun rises in the east (singular third-person verb)! ☀️', 'easy', 'Sun is singular so we add -s.'),
+  rq('e-ez-7', 'word', 4, 'Choose the correct sentence:', ['She are happy.', 'She am happy.', 'She is happy.'], 'She is happy.', 'Use "is" with singular pronoun "She"! 😊', 'easy', 'She goes with "is".'),
+  rq('e-ez-8', 'word', 4, 'What is the plural of "child"?', ['Childs', 'Childes', 'Children'], 'Children', 'The plural of child is children! 🧒👧', 'easy', 'Irregular plural ending in -ren.'),
+  rq('e-ez-9', 'word', 4, 'Rearrange into a correct sentence: school / I / every day / go / to', ['I go to school every day.', 'I to school go every day.', 'Every day school I go to.'], 'I go to school every day.', 'Subject (I) + Verb (go) + Object (to school)! 🏫', 'easy', 'Start with Subject "I".'),
+  rq('e-ez-10', 'word', 4, 'Fill in the blank: "I have ___ apple."', ['a', 'an', 'the'], 'an', 'Use "an" before vowel sounds (apple starts with A)! 🍎', 'easy', 'Apple starts with a vowel A.'),
 
-  // ── ENGLISH · Paragraph level (Santoor Ch 2, 3, 6, 7) ──────────────────────
-  rq('e-p1', 'paragraph', 2, 'In the story "Badal and Moti", what is Moti?', ['A puppy', 'A kitten', 'A bird'], 'A puppy',
-     "Moti is Badal's loyal puppy — the heart of 'Badal and Moti'! 🐶"),
-  rq('e-p2', 'paragraph', 2, 'In "Badal and Moti", who is Badal?', ['A young boy', 'A teacher', 'A farmer'], 'A young boy',
-     'Badal is a kind young boy who cares for Moti! 👦'),
-  rq('e-p3', 'paragraph', 6, 'In the story "Paper Boats", what does the child make?', ['Paper boats', 'Paper planes', 'Paper caps'], 'Paper boats',
-     "Rainy days are for floating paper boats! ⛵"),
-  rq('e-p4', 'paragraph', 6, 'Where does the child float the paper boats?', ['In the rain water', 'In the swimming pool', 'In the bathtub'], 'In the rain water',
-     'The child sails the boats on the water collected from the rain! 🌧️'),
-  rq('e-p5', 'paragraph', 7, 'In "The Big Laddoo", what is shared among everyone?', ['A big laddoo', 'A big cake', 'A big mango'], 'A big laddoo',
-     "One giant laddoo shared by all — 'The Big Laddoo'! 🍥"),
-  rq('e-p6', 'paragraph', 3, 'The chapter "Best Friends" is about…', ['Friends who help each other', 'Animals in a zoo', 'A school picnic'], 'Friends who help each other',
-     "True best friends always help each other! 🤝"),
+  rq('e-ez-11', 'paragraph', 2, 'What is the opposite of "early"?', ['Late', 'Fast', 'Soon'], 'Late', 'The opposite of early is late! ⏰', 'easy', 'If you are not early, you are...'),
+  rq('e-ez-12', 'paragraph', 2, 'Which sentence correctly describes a school?', ['My school has a big library and play area.', 'School flying in sky.', 'Tree is school.'], 'My school has a big library and play area.', 'Clear, complete sentence describing a school! 🏫', 'easy', 'Choose the sentence that makes full sense.'),
+  rq('e-ez-13', 'paragraph', 2, 'What is the plural of "book"?', ['Books', 'Bookes', 'Bookies'], 'Books', 'Just add -s to make books! 📚', 'easy', 'Add s to book.'),
+  rq('e-ez-14', 'paragraph', 2, 'Identify the noun in: "The dog is sleeping."', ['is', 'sleeping', 'dog'], 'dog', '"Dog" is a naming word (noun) for an animal! 🐶', 'easy', 'A noun is a person, animal, or thing.'),
+  rq('e-ez-15', 'paragraph', 2, 'Which set of words describes a good friend best?', ['Kind, Helpful, Honest', 'Angry, Loud, Cold', 'Fast, Dark, Heavy'], 'Kind, Helpful, Honest', 'A good friend is kind, helpful, and honest! 💛', 'easy', 'Think of nice qualities.'),
 
-  // ── ENGLISH · Story & Comprehension level (Santoor Ch 10, 11, 12) ──────────
-  rq('e-s1', 'story', 11, 'Who counts the stars in the poem "Chanda Mama Counts the Stars"?', ['The Moon', 'The Sun', 'A little girl'], 'The Moon',
-     "Chanda Mama is the Moon, counting twinkling stars! 🌙"),
-  rq('e-s2', 'story', 11, '"Chanda Mama" is another name for the…', ['Moon', 'Star', 'Cloud'], 'Moon',
-     'Chanda Mama lovingly means the Moon Uncle! 🌕'),
-  rq('e-s3', 'story', 12, 'What did Chandrayaan land on?', ['The Moon', 'The Sun', 'Mars'], 'The Moon',
-     "India's Chandrayaan mission reached the Moon! 🚀"),
-  rq('e-s4', 'story', 12, 'The chapter "Chandrayaan" tells us about…', ["India's moon mission", 'A school fair', 'A river journey'], "India's moon mission",
-     'Chandrayaan is India proudly exploring the Moon! 🇮🇳'),
-  rq('e-s5', 'story', 10, 'In the poem "Night", when do the stars come out?', ['At night', 'In the morning', 'At noon'], 'At night',
-     'The stars twinkle in the dark night sky! ✨'),
+  // =========================================================================
+  // 🟡 MEDIUM (15 QUESTIONS)
+  // =========================================================================
+  rq('e-md-16', 'paragraph', 2, 'Passage: "Meena woke up early on Sunday morning. She helped her mother clean the house." When did Meena wake up early?', ['Monday', 'Friday', 'Sunday'], 'Sunday', 'Meena woke up early on Sunday morning! 🌅', 'medium', 'Check the first sentence of the passage.'),
+  rq('e-md-17', 'paragraph', 2, 'Whom did Meena help?', ['Her father', 'Her mother', 'Her sister'], 'Her mother', 'She helped her mother clean the house! 🧹', 'medium', 'Read sentence 2 of the passage.'),
+  rq('e-md-18', 'paragraph', 2, 'What did Meena plant in the garden?', ['Flowers', 'Vegetables', 'Two small plants'], 'Two small plants', 'She planted two small plants in the garden! 🌿', 'medium', 'Look at the garden sentence.'),
+  rq('e-md-19', 'paragraph', 2, 'Why did Meena water the plants every day?', ['She wanted to sell them.', 'She wanted them to grow into healthy trees.', 'She wanted to decorate the house.'], 'She wanted them to grow into healthy trees.', 'She watered them so they would grow into healthy trees! 🌳', 'medium', 'Check the last sentence for "because".'),
+  rq('e-md-20', 'paragraph', 2, 'What is the most suitable title for Meena\'s story?', ['Meena and Her Plants', 'A Day at the Zoo', 'Shopping on Sunday'], 'Meena and Her Plants', '"Meena and Her Plants" captures the main theme! 📖', 'medium', 'Choose the title about plants and Meena.'),
+
+  rq('e-md-21', 'story', 10, 'Choose the correct verb: "The children ___ playing in the park."', ['is', 'am', 'are'], 'are', 'Use "are" for plural subjects like "children"! 🛝', 'medium', 'Children is plural.'),
+  rq('e-md-22', 'story', 10, 'What is a synonym (same meaning) of "happy"?', ['Sad', 'Glad', 'Tired'], 'Glad', 'Glad means the exact same thing as happy! 😊', 'medium', 'Glad and happy are synonyms.'),
+  rq('e-md-23', 'story', 10, 'What is the opposite of "careful"?', ['Helpful', 'Careless', 'Kind'], 'Careless', 'Adding suffix -less gives careless (opposite of careful)! ⚠️', 'medium', 'Opposite of care-ful is care-...'),
+  rq('e-md-24', 'story', 10, 'Identify the adjective in: "The tall boy won the race."', ['boy', 'won', 'tall'], 'tall', '"Tall" describes the boy, so it is an adjective! 🏃', 'medium', 'Which word describes the boy?'),
+  rq('e-md-25', 'story', 10, 'Change "She walks to school" into the past tense:', ['She walk to school.', 'She walked to school.', 'She walking to school.'], 'She walked to school.', 'Add -ed for standard past tense: walked! 🚶‍♀️', 'medium', 'Past tense of walk is walked.'),
+
+  rq('e-md-26', 'story', 11, 'Rearrange the words: beautiful / is / garden / the', ['The garden is beautiful.', 'Beautiful the garden is.', 'Is garden the beautiful.'], 'The garden is beautiful.', 'Subject (The garden) + Verb (is) + Adjective (beautiful)! 🌸', 'medium', 'Start with "The garden".'),
+  rq('e-md-27', 'story', 11, 'Which sentence correctly describes a best friend?', ['My best friend always shares toys and helps me with homework.', 'Best friend is a tree.', 'I do not know any friend.'], 'My best friend always shares toys and helps me with homework.', 'Expresses positive traits of a best friend! 👫', 'medium', 'Look for supportive actions.'),
+  rq('e-md-28', 'story', 11, 'Which sentence uses "because" correctly?', ['I stayed inside because it was raining.', 'Because raining outside I.', 'I because stayed inside.'], 'I stayed inside because it was raining.', '"Because" connects cause and effect properly! 🌧️', 'medium', 'Because gives a reason.'),
+  rq('e-md-29', 'story', 11, 'Complete the story start: "When Rahul opened his school bag, he found a small..."', ['puppy hiding inside.', 'and bag closed.', 'school building.'], 'puppy hiding inside.', 'Creates a logical, interesting continuation! 🐶', 'medium', 'What interesting object fits in a bag?'),
+  rq('e-md-30', 'story', 11, 'Which sentence is suitable for a paragraph on "My Favourite Game"?', ['Cricket is my favourite game because I love batting with my team.', 'Game is game.', 'I like eating apples.'], 'Cricket is my favourite game because I love batting with my team.', 'Directly states favourite game with reason! 🏏', 'medium', 'Must mention a game and reason.'),
+
+  // =========================================================================
+  // 🔴 HARD (15 QUESTIONS)
+  // =========================================================================
+  rq('e-hd-31', 'story', 12, 'Passage: "Arjun noticed the village pond was filled with plastic. The villagers used the pond for animals and farming." Why was the dirty pond a serious problem?', ['The villagers used the pond for animals and farming.', 'Arjun wanted to swim in it.', 'The pond was too small.'], 'The villagers used the pond for animals and farming.', 'Polluted water directly affected animals and agriculture! 🐄🌾', 'hard', 'Re-read sentence 2 of the village story.'),
+  rq('e-hd-32', 'story', 12, 'What idea did Arjun suggest to solve the pond issue?', ['Organizing a cleaning activity', 'Selling the pond', 'Ignoring the trash'], 'Organizing a cleaning activity', 'He suggested organizing a community cleaning drive! 🧹', 'hard', 'Look at Arjun\'s conversation with grandmother.'),
+  rq('e-hd-33', 'story', 12, 'Who participated in cleaning the pond?', ['Only Arjun', 'Several children and adults', 'Only farmers'], 'Several children and adults', 'Children and adults worked together next morning! 👥', 'hard', 'Check who worked together the next morning.'),
+  rq('e-hd-34', 'story', 12, 'What did they do right after removing the waste?', ['They placed a sign asking people not to throw garbage.', 'They went on vacation.', 'They built a wall.'], 'They placed a sign asking people not to throw garbage.', 'They posted a sign to prevent future littering! 🪧', 'hard', 'Look at what was placed after cleaning.'),
+  rq('e-hd-35', 'story', 12, 'What is the main moral lesson of Arjun\'s village story?', ['We should keep our surroundings clean and work together.', 'Villages are noisy.', 'Ponds cannot be cleaned.'], 'We should keep our surroundings clean and work together.', 'Community action and environmental care solve big issues! 🌏', 'hard', 'What positive value does the story teach?'),
+
+  rq('e-hd-36', 'story', 12, 'Choose the grammatically correct complex sentence:', ['Although it was raining, we went outside.', 'Although it was raining but we went outside.', 'Although raining we outside went.'], 'Although it was raining, we went outside.', 'Do not mix "Although" with "but" in the same clause! ☔', 'hard', 'Avoid using "although" and "but" together.'),
+  rq('e-hd-37', 'story', 12, 'Change "Riya completed her homework" into the future tense:', ['Riya will complete her homework.', 'Riya completing homework.', 'Riya completed homework tomorrow.'], 'Riya will complete her homework.', 'Use auxiliary verb "will" + base verb "complete"! 🔮', 'hard', 'Future tense uses "will".'),
+  rq('e-hd-38', 'story', 12, 'Identify the main action verb in: "The children carefully crossed the road."', ['carefully', 'crossed', 'road'], 'crossed', '"Crossed" is the action verb performed by children! 🚦', 'hard', 'Carefully is an adverb; crossed is the verb.'),
+  rq('e-hd-39', 'story', 12, 'Combine correctly using "because": (1) Anu carried an umbrella. (2) It was raining.', ['Anu carried an umbrella because it was raining.', 'It was raining because Anu carried an umbrella.', 'Anu umbrella because rain.'], 'Anu carried an umbrella because it was raining.', 'Carrying an umbrella was caused by the rain! ☂️', 'hard', 'Action comes first, then because + reason.'),
+  rq('e-hd-40', 'story', 12, 'Correct the agreement error: "Rahul and his friend is playing cricket."', ['Rahul and his friend are playing cricket.', 'Rahul and his friend am playing cricket.', 'Rahul and his friend be playing cricket.'], 'Rahul and his friend are playing cricket.', 'Plural compound subject (Rahul + friend = 2 people) requires "are"! 🏏', 'hard', 'Two people require "are".'),
+
+  rq('e-hd-41', 'story', 12, 'If you found a lost puppy near school, what is the best first step?', ['Check for a collar tag and inform the school office/guard.', 'Leave it alone on the road.', 'Take it home without asking anyone.'], 'Check for a collar tag and inform the school office/guard.', 'Responsible action ensures safety and owner contact! 🐶', 'hard', 'Think of safety and responsible behavior.'),
+  rq('e-hd-42', 'story', 12, 'Which sentence opening is appropriate for a formal birthday invitation letter?', ['Dear Friend, You are cordially invited to my birthday party on Sunday!', 'Hey give me gift.', 'Party at house.'], 'Dear Friend, You are cordially invited to my birthday party on Sunday!', 'Polite and clear invitation phrasing! 🎉', 'hard', 'Look for polite and complete invitation.'),
+  rq('e-hd-43', 'story', 12, 'Which sentence best describes a scene in a busy market?', ['Vendors are calling out prices while shoppers browse colorful fruit stalls.', 'The room is quiet.', 'Zero people exist.'], 'Vendors are calling out prices while shoppers browse colorful fruit stalls.', 'Vivid sensory description of a busy market scene! 🛒', 'hard', 'Look for descriptions of crowds and stalls.'),
+  rq('e-hd-44', 'story', 12, 'Which sentence correctly connects these story words: forest - lost - rain - friend - home?', ['My friend and I got lost in the rainy forest, but we safely reached home.', 'Forest rain friend home lost.', 'We went home without forest.'], 'My friend and I got lost in the rainy forest, but we safely reached home.', 'Combines all 5 story keywords in a logical sequence! 🌲🌧️', 'hard', 'Must include all 5 keywords in order.'),
+  rq('e-hd-45', 'story', 12, 'Which sentence best begins an essay on "If I could change one thing in my school..."?', ['If I could change one thing, I would add a green garden with eco-friendly recycling bins.', 'School is building.', 'No change needed.'], 'If I could change one thing, I would add a green garden with eco-friendly recycling bins.', 'Clear thesis sentence outlining a meaningful school improvement idea! 🏫🌱', 'hard', 'Look for constructive school improvement ideas.'),
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────

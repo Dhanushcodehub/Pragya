@@ -71,6 +71,8 @@ export interface Learner {
   badges: Badge[];
 }
 
+export type QuestionDifficulty = 'easy' | 'medium' | 'hard';
+
 export interface PracticeQuestion {
   id: string;
   pathway: 'reading' | 'numeracy';
@@ -81,6 +83,8 @@ export interface PracticeQuestion {
   correctAnswer: string;
   explanation: string;      // Encouraging feedback
   xp: number;
+  difficulty?: QuestionDifficulty;
+  hint?: string;
 }
 
 export interface MasteryChallengeResult {

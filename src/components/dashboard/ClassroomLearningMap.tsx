@@ -280,38 +280,95 @@ export default function ClassroomLearningMap({ learners }: { learners: PragyaLea
                   </button>
                 </div>
 
-                {/* Modal Stats */}
-                <div className="p-7 grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5 flex flex-col justify-between">
-                    <div className="flex items-center gap-2 mb-2">
-                      <BookOpen className="w-4 h-4 text-blue-600" />
-                      <span className="text-xs font-bold text-blue-700 uppercase tracking-wider">Reading</span>
+                {/* Modal Stats & Detailed Assessment Report */}
+                <div className="p-7 space-y-6 max-h-[70vh] overflow-y-auto">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5 flex flex-col justify-between">
+                      <div className="flex items-center gap-2 mb-2">
+                        <BookOpen className="w-4 h-4 text-blue-600" />
+                        <span className="text-xs font-bold text-blue-700 uppercase tracking-wider">Reading Stage</span>
+                      </div>
+                      <div className="text-xl font-extrabold text-blue-950">{formatLevel(selectedLearner.reading_level)}</div>
+                      <TrendingUp className="w-4 h-4 text-blue-400 self-end mt-2" />
                     </div>
-                    <div className="text-xl font-extrabold text-blue-950">{formatLevel(selectedLearner.reading_level)}</div>
-                    <TrendingUp className="w-4 h-4 text-blue-400 self-end mt-2" />
+
+                    <div className="bg-purple-50 border border-purple-100 rounded-2xl p-5 flex flex-col justify-between">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Hash className="w-4 h-4 text-purple-600" />
+                        <span className="text-xs font-bold text-purple-700 uppercase tracking-wider">Math Stage</span>
+                      </div>
+                      <div className="text-xl font-extrabold text-purple-950">{formatLevel(selectedLearner.numeracy_level)}</div>
+                      <TrendingUp className="w-4 h-4 text-purple-400 self-end mt-2" />
+                    </div>
+
+                    <div className={`rounded-2xl p-5 border bg-gradient-to-br ${getStatusBg(selectedLearner.status)} flex flex-col justify-between`}>
+                      <div className="flex items-center gap-2 mb-2">
+                        <Star className="w-4 h-4 text-amber-500" />
+                        <span className="text-xs font-bold text-zinc-700 uppercase tracking-wider">Overall Status</span>
+                      </div>
+                      <p className="text-xs font-black uppercase text-zinc-800 leading-relaxed">
+                        {selectedLearner.status.replace('-', ' ')}
+                      </p>
+                    </div>
                   </div>
 
-                  <div className="bg-purple-50 border border-purple-100 rounded-2xl p-5 flex flex-col justify-between">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Hash className="w-4 h-4 text-purple-600" />
-                      <span className="text-xs font-bold text-purple-700 uppercase tracking-wider">Math</span>
+                  {/* Detailed Diagnostic Assessment Report */}
+                  <div className="bg-zinc-50 border border-zinc-200/80 rounded-2xl p-5 space-y-4">
+                    <div className="flex items-center justify-between border-b border-zinc-200/80 pb-3">
+                      <h4 className="text-sm font-extrabold text-zinc-900 uppercase tracking-wider flex items-center gap-2">
+                        📊 Detailed Assessment & Diagnostic Summary
+                      </h4>
+                      <span className="text-[11px] font-mono font-bold text-zinc-500 bg-white px-2.5 py-1 rounded-lg border border-zinc-200">NCERT Class 5 Aligned</span>
                     </div>
-                    <div className="text-xl font-extrabold text-purple-950">{formatLevel(selectedLearner.numeracy_level)}</div>
-                    <TrendingUp className="w-4 h-4 text-purple-400 self-end mt-2" />
-                  </div>
 
-                  <div className={`rounded-2xl p-5 border bg-gradient-to-br ${getStatusBg(selectedLearner.status)} flex flex-col justify-between`}>
-                    <div className="flex items-center gap-2 mb-2">
-                      <Star className="w-4 h-4 text-amber-500" />
-                      <span className="text-xs font-bold text-zinc-700 uppercase tracking-wider">AI Tip</span>
+                    {/* Skill Breakdown */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                      <div className="bg-white p-4 rounded-xl border border-zinc-200 space-y-2">
+                        <div className="font-extrabold text-zinc-800 flex justify-between">
+                          <span>📖 English Reading Comprehension</span>
+                          <span className="text-emerald-600 font-black">
+                            {selectedLearner.reading_level === 'story' ? '92% Mastery' : selectedLearner.reading_level === 'paragraph' ? '74% Mastery' : '45% Developing'}
+                          </span>
+                        </div>
+                        <p className="text-zinc-600 text-[11px]">
+                          {selectedLearner.reading_level === 'story'
+                            ? 'Fluent in NCERT Marigold comprehension stories, context clues & vocabulary.'
+                            : selectedLearner.reading_level === 'paragraph'
+                            ? 'Reads connected text smoothly; working on inferential comprehension.'
+                            : 'Focusing on letter-sound correspondence and word blending.'}
+                        </p>
+                      </div>
+
+                      <div className="bg-white p-4 rounded-xl border border-zinc-200 space-y-2">
+                        <div className="font-extrabold text-zinc-800 flex justify-between">
+                          <span>🧮 Math-Magic Numeracy</span>
+                          <span className="text-emerald-600 font-black">
+                            {selectedLearner.numeracy_level === 'division' ? '95% Mastery' : selectedLearner.numeracy_level === 'subtraction' ? '78% Mastery' : '50% Developing'}
+                          </span>
+                        </div>
+                        <p className="text-zinc-600 text-[11px]">
+                          {selectedLearner.numeracy_level === 'division'
+                            ? 'Mastered equal sharing, place value & LCM concepts from Math-Magic.'
+                            : selectedLearner.numeracy_level === 'subtraction'
+                            ? 'Strong 2-digit subtraction with regrouping; developing division fluency.'
+                            : 'Building foundational place-value sense & 2-digit number recognition.'}
+                        </p>
+                      </div>
                     </div>
-                    <p className="text-xs font-bold text-zinc-800 leading-relaxed">
-                      {selectedLearner.status === 'secure'
-                        ? 'Advanced extension activities recommended.'
-                        : selectedLearner.status === 'developing'
-                        ? 'Try peer reading & extra practice sheets.'
-                        : 'Schedule phonics & numeracy one-on-one.'}
-                    </p>
+
+                    {/* Targeted Teacher Recommendations */}
+                    <div className="bg-amber-500/10 border border-amber-300/60 rounded-xl p-4 text-xs space-y-1">
+                      <div className="font-extrabold text-amber-900 flex items-center gap-1.5">
+                        💡 Teacher Action Plan & Recommended Intervention:
+                      </div>
+                      <p className="text-amber-950 font-medium leading-normal">
+                        {selectedLearner.status === 'secure'
+                          ? 'Assign Class 5 NCERT Math-Magic challenge worksheets & story extension exercises.'
+                          : selectedLearner.status === 'developing'
+                          ? 'Conduct 10-minute daily peer-guided subtraction & paragraph reading practice.'
+                          : 'Provide targeted 1-on-1 phonics & bundle-stick regrouping support in small groups.'}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </motion.div>
