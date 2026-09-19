@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -9,12 +9,7 @@ import { MOCK_PRACTICE_QUESTIONS } from '@/lib/nipun/syntheticData';
 import { useStudent } from '@/lib/nipun/StudentContext';
 import MasteryChallenge from './MasteryChallenge';
 
-declare global {
-  interface Window {
-    SpeechRecognition: any;
-    webkitSpeechRecognition: any;
-  }
-}
+// Types are provided by standard library or we can cast to any when needed
 
 export default function PracticeZone() {
   const searchParams = useSearchParams();
@@ -34,7 +29,8 @@ export default function PracticeZone() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const anyWindow = window as any;
+      const SpeechRecognition = anyWindow.SpeechRecognition || anyWindow.webkitSpeechRecognition;
       if (SpeechRecognition) {
         const reco = new SpeechRecognition();
         reco.continuous = false;
@@ -90,7 +86,7 @@ export default function PracticeZone() {
     if (isSubmitted) return;
     const lowerText = text.toLowerCase().trim();
     
-    let matchedOpt = null;
+    let matchedOpt: string | null = null;
     currentQ.options.forEach((opt, index) => {
       const letter = String.fromCharCode(65 + index).toLowerCase();
       if (lowerText === letter || lowerText === `option ${letter}` || lowerText.includes(opt.toLowerCase())) {
@@ -99,8 +95,9 @@ export default function PracticeZone() {
     });
 
     if (matchedOpt) {
-      setSelectedOption(matchedOpt);
-      setTimeout(() => submitSpecificAnswer(matchedOpt), 1000);
+      const finalOpt: string = matchedOpt;
+      setSelectedOption(finalOpt);
+      setTimeout(() => submitSpecificAnswer(finalOpt), 1000);
     }
   };
 

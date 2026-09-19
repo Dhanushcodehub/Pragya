@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -308,10 +308,8 @@ export default function LevelMap() {
       
       {showLevelUp && (
         <LevelUpModal 
-          isOpen={true} 
+          level={2} 
           onClose={() => setShowLevelUp(false)} 
-          newLevel="Paragraph Explorer" 
-          badgesEarned={1} 
         />
       )}
 
