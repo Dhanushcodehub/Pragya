@@ -94,22 +94,35 @@ function LoginForm() {
 
   const handleStudentLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!studentCode.trim() || !studentPin.trim()) {
+      setError('Please enter your Class Code and PIN.');
+      return;
+    }
     setLoading(true);
     setError(null);
-    
-    const cleanCode = studentCode.trim().toUpperCase();
+
+    const cleanCode = studentCode.trim();
     const cleanPin = studentPin.trim();
 
     try {
       const supabase = createClient();
-      const { data, error: supaError } = await supabase
+      const { data: matches, error: supaError } = await supabase
         .from('pragya_learners')
         .select('*')
         .ilike('class_code', cleanCode)
         .eq('secret_pin', cleanPin)
-        .maybeSingle();
+        .limit(1);
 
-      if (supaError || !data) {
+      if (supaError) {
+        console.error('Student login DB error:', supaError);
+        setError('Something went wrong. Please try again.');
+        setLoading(false);
+        return;
+      }
+
+      const data = matches && Array.isArray(matches) && matches.length > 0 ? matches[0] : null;
+
+      if (!data) {
         setError('Invalid Class Code or Secret PIN. Please ask your teacher!');
         setLoading(false);
         return;
@@ -122,6 +135,7 @@ function LoginForm() {
       // Redirect directly to the gamified student portal
       router.push('/student');
     } catch (err: any) {
+      console.error('Student login exception:', err);
       setError('An error occurred during student login. Please try again.');
     } finally {
       setLoading(false);

@@ -13,6 +13,7 @@ interface StudentContextType {
   isAuthenticated: boolean;
   addXp: (amount: number) => void;
   updateLevel: (subject: 'reading' | 'numeracy', newLevel: string) => Promise<void>;
+  logout: () => void;
 }
 
 const StudentContext = createContext<StudentContextType>({
@@ -23,11 +24,13 @@ const StudentContext = createContext<StudentContextType>({
   isAuthenticated: false,
   addXp: () => {},
   updateLevel: async () => {},
+  logout: () => {},
 });
 
 export function StudentProvider({ children }: { children: React.ReactNode }) {
   const [learner, setLearner] = useState<Learner | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [levelUpData, setLevelUpData] = useState<number | null>(null);
   const supabase = createClient();
 
@@ -35,34 +38,40 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
     async function loadStudent() {
       try {
         const studentId = localStorage.getItem('pragya_student_id');
+
         if (!studentId) {
+          setIsAuthenticated(false);
           setLearner(null);
           setIsLoading(false);
           return;
         }
 
-        const { data, error } = await supabase
+        const { data: rows, error } = await supabase
           .from('pragya_learners')
           .select('*')
           .eq('id', studentId)
-          .maybeSingle();
+          .limit(1);
+
+        const data = rows && Array.isArray(rows) && rows.length > 0 ? rows[0] : null;
 
         if (error || !data) {
           console.warn("Failed to load student from database:", error);
           if (studentId === 'learner-001') {
             setLearner(MOCK_ACTIVE_STUDENT);
+            setIsAuthenticated(true);
           } else {
+            localStorage.removeItem('pragya_student_id');
+            localStorage.removeItem('pragya_student_name');
             setLearner(null);
+            setIsAuthenticated(false);
           }
           setIsLoading(false);
           return;
         }
 
-        // Load local progress (XP, streak) from localStorage to simulate a full DB for the demo
         const localProgressRaw = localStorage.getItem(`pragya_progress_${studentId}`);
-        const localProgress = localProgressRaw ? JSON.parse(localProgressRaw) : { xp: 0, streakDays: 0, level: 1 };
+        const localProgress = localProgressRaw ? JSON.parse(localProgressRaw) : { xp: 0, streakDays: 0 };
 
-        // Merge DB data with Mock structure
         const activeLearner: Learner = {
           ...MOCK_ACTIVE_STUDENT,
           id: data.id,
@@ -76,8 +85,11 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
         };
 
         setLearner(activeLearner);
+        setIsAuthenticated(true);
       } catch (err) {
         console.error("Error in loadStudent:", err);
+        setIsAuthenticated(false);
+        setLearner(null);
       } finally {
         setIsLoading(false);
       }
@@ -88,14 +100,14 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
 
   const addXp = (amount: number) => {
     if (!learner) return;
-    
+
     setLearner(prev => {
       if (!prev) return prev;
-      
+
       const oldLevel = Math.floor(prev.xp / 100) + 1;
       const newXp = prev.xp + amount;
       const newLevel = Math.floor(newXp / 100) + 1;
-      
+
       if (newLevel > oldLevel) {
         setLevelUpData(newLevel);
       }
@@ -103,9 +115,9 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
       const updated = { ...prev, xp: newXp };
       localStorage.setItem(`pragya_progress_${prev.id}`, JSON.stringify({
         xp: updated.xp,
-        streakDays: updated.streakDays
+        streakDays: updated.streakDays,
       }));
-      
+
       return updated;
     });
   };
@@ -115,8 +127,7 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
   const updateLevel = async (subject: 'reading' | 'numeracy', newLevel: string) => {
     if (!learner) return;
 
-    // Update in Supabase
-    const updatePayload = subject === 'reading' 
+    const updatePayload = subject === 'reading'
       ? { reading_level: newLevel }
       : { numeracy_level: newLevel };
 
@@ -130,10 +141,9 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // Update in local state
     setLearner(prev => {
       if (!prev) return prev;
-      
+
       return {
         ...prev,
         readingLevel: subject === 'reading' ? (newLevel as any) : prev.readingLevel,
@@ -142,8 +152,19 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
+  const logout = () => {
+    localStorage.removeItem('pragya_student_id');
+    localStorage.removeItem('pragya_student_name');
+    setLearner(null);
+    setIsAuthenticated(false);
+    window.location.href = '/login';
+  };
+
   return (
-    <StudentContext.Provider value={{ learner, isLoading, isAuthenticated: !!learner, addXp, updateLevel, levelUpData, clearLevelUp }}>
+    <StudentContext.Provider value={{
+      learner, isLoading, isAuthenticated,
+      addXp, updateLevel, levelUpData, clearLevelUp, logout,
+    }}>
       {children}
     </StudentContext.Provider>
   );

@@ -138,117 +138,130 @@ export async function signUpAction(formData: FormData) {
  * Server Action: Sign In User
  */
 export async function signInAction(formData: FormData) {
-  const email = formData.get('email') as string;
-  const password = formData.get('password') as string;
-
-  if (!email || !password) {
-    return { error: 'Email and password are required' };
-  }
-
-  const { ipAddress, userAgent, location } = await getClientMetadata();
-
-  // 1. Rate Limiting Check on Route level
-  const rateLimitResult = await checkRateLimit(ipAddress);
-  if (!rateLimitResult.success) {
-    return { error: 'Too many requests. Please wait a minute and try again.' };
-  }
-
-  // 2. Account Lockout Check
-  const lockout = await checkLockout(email);
-  if (lockout.locked) {
-    return { error: `Account is temporarily locked due to too many failed attempts. Try again in ${Math.ceil(lockout.remaining / 60)} minutes.` };
-  }
-
-  const supabase = await createClient();
-  const adminClient = createAdminClient();
-
-  // Resolve user_id if possible (even for failed attempts)
-  let userId: string | undefined;
   try {
-    const { data: profile } = await adminClient
-      .from('profiles')
-      .select('id')
-      .eq('email', email.toLowerCase())
-      .maybeSingle();
-    if (profile) {
-      userId = profile.id;
+    const email = formData.get('email') as string;
+    const password = formData.get('password') as string;
+
+    if (!email || !password) {
+      return { error: 'Email and password are required' };
     }
-  } catch (err) {
-    // Silently continue if we cannot fetch user by email
-  }
 
-  // 3. Authenticate with Supabase Auth
-  let { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
+    const { ipAddress, userAgent, location } = await getClientMetadata();
 
-  // Fallback: If we didn't find the userId in profiles, try listing users from Auth directly
-  if (error && error.message.toLowerCase().includes('email not confirmed') && !userId) {
+    // 1. Rate Limiting Check on Route level
+    const rateLimitResult = await checkRateLimit(ipAddress);
+    if (!rateLimitResult.success) {
+      return { error: 'Too many requests. Please wait a minute and try again.' };
+    }
+
+    // 2. Account Lockout Check
+    const lockout = await checkLockout(email);
+    if (lockout.locked) {
+      return { error: `Account is temporarily locked due to too many failed attempts. Try again in ${Math.ceil(lockout.remaining / 60)} minutes.` };
+    }
+
+    const supabase = await createClient();
+    const adminClient = createAdminClient();
+
+    // Resolve user_id if possible (even for failed attempts)
+    let userId: string | undefined;
     try {
-      const { data: usersData } = await adminClient.auth.admin.listUsers();
-      const authUser = usersData?.users.find((u: any) => u.email?.toLowerCase() === email.toLowerCase());
-      if (authUser) {
-        userId = authUser.id;
+      const { data: profile } = await adminClient
+        .from('profiles')
+        .select('id')
+        .eq('email', email.toLowerCase())
+        .limit(1);
+      const profileRow = profile && Array.isArray(profile) ? profile[0] : profile;
+      if (profileRow) {
+        userId = profileRow.id;
       }
-    } catch (e) {
-      // Ignore
+    } catch (err) {
+      // Silently continue if we cannot fetch user by email
     }
-  }
 
-  if (error && error.message.toLowerCase().includes('email not confirmed') && userId) {
-    // Auto-confirm the user to bypass email rate limits on older unconfirmed accounts
-    await adminClient.auth.admin.updateUserById(userId, { email_confirm: true });
-    const retry = await supabase.auth.signInWithPassword({ email, password });
-    data = retry.data;
-    error = retry.error;
-  }
-
-  if (error) {
-    console.log('[DEBUG signInAction] Supabase Auth Error:', error.message);
-    // Increments failed attempts and logs audit trail
-    await incrementFailedAttempts(email);
-    
-    // Log failed attempt in sessions_log
-    await adminClient.from('sessions_log').insert({
-      user_id: userId || null,
-      ip_address: ipAddress,
-      user_agent: userAgent,
-      location,
-      login_status: 'failed',
-      is_active: false,
+    // 3. Authenticate with Supabase Auth
+    let { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
     });
 
-    return { error: error.message };
+    // Fallback: If we didn't find the userId in profiles, try listing users from Auth directly
+    if (error && error.message.toLowerCase().includes('email not confirmed') && !userId) {
+      try {
+        const { data: usersData } = await adminClient.auth.admin.listUsers();
+        const authUser = usersData?.users.find((u: any) => u.email?.toLowerCase() === email.toLowerCase());
+        if (authUser) {
+          userId = authUser.id;
+        }
+      } catch (e) {
+        // Ignore
+      }
+    }
+
+    if (error && error.message.toLowerCase().includes('email not confirmed') && userId) {
+      // Auto-confirm the user to bypass email rate limits on older unconfirmed accounts
+      await adminClient.auth.admin.updateUserById(userId, { email_confirm: true });
+      const retry = await supabase.auth.signInWithPassword({ email, password });
+      data = retry.data;
+      error = retry.error;
+    }
+
+    if (error) {
+      console.log('[DEBUG signInAction] Supabase Auth Error:', error.message);
+      // Increments failed attempts and logs audit trail
+      try {
+        await incrementFailedAttempts(email);
+        await adminClient.from('sessions_log').insert({
+          user_id: userId || null,
+          ip_address: ipAddress,
+          user_agent: userAgent,
+          location,
+          login_status: 'failed',
+          is_active: false,
+        });
+      } catch (logErr) {
+        // Ignore logging errors on failed login
+      }
+
+      return { error: error.message };
+    }
+
+    // Successful login: reset failed attempts
+    try {
+      await resetFailedAttempts(email);
+      const session = data.session;
+      const sessionId = session ? getSessionIdFromToken(session.access_token) : undefined;
+
+      if (session && session.user) {
+        await adminClient.from('sessions_log').insert({
+          user_id: session.user.id,
+          session_id: sessionId || null,
+          ip_address: ipAddress,
+          user_agent: userAgent,
+          location,
+          login_status: 'success',
+          is_active: true,
+        });
+      }
+    } catch (logErr) {
+      // Non-critical logging failure
+    }
+
+    // Check MFA (AAL status)
+    try {
+      const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (aalData && aalData.nextLevel === 'aal2' && aalData.currentLevel === 'aal1') {
+        return { success: true, mfaRequired: true, redirect: '/mfa/verify' };
+      }
+    } catch (mfaErr) {
+      // MFA check error ignored if not enrolled
+    }
+
+    return { success: true, redirect: '/dashboard' };
+  } catch (err: any) {
+    console.error('[signInAction Exception]:', err);
+    return { error: err.message || 'An unexpected error occurred during sign in.' };
   }
-
-  // Successful login: reset failed attempts
-  await resetFailedAttempts(email);
-
-  const session = data.session;
-  const sessionId = session ? getSessionIdFromToken(session.access_token) : undefined;
-
-  // Log successful login session
-  if (session && session.user) {
-    await adminClient.from('sessions_log').insert({
-      user_id: session.user.id,
-      session_id: sessionId || null,
-      ip_address: ipAddress,
-      user_agent: userAgent,
-      location,
-      login_status: 'success',
-      is_active: true,
-    });
-  }
-
-  // Check MFA (AAL status)
-  const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-  if (aalData && aalData.nextLevel === 'aal2' && aalData.currentLevel === 'aal1') {
-    // User has MFA enrolled but needs to complete verification
-    return { success: true, mfaRequired: true, redirect: '/mfa/verify' };
-  }
-
-  return { success: true, redirect: '/dashboard' };
 }
 
 /**
