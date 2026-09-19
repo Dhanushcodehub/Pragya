@@ -165,11 +165,11 @@ README.md
 
 | Role | Responsibility | Member |
 |---|---|---|
-| **Product-Problem Lead** | Child-off-screen framing & PS-E01 alignment | [FILL_NAME] |
-| **Assessment-Data Lead** | Question bank, synthetic data generator, & validation | [FILL_NAME] |
-| **Algorithm Lead** | Deterministic adaptive engine, bottleneck investigator | [FILL_NAME] |
-| **Teacher-UX Lead** | Command Center, Classroom Map, Conductor, & WHY Panel | [FILL_NAME] |
-| **Chassis-Integration Lead** | Repo conversion, Supabase Auth/RLS, & Gemini integration | [FILL_NAME] |
+| **Product-Problem Lead** | Child-off-screen framing & PS-E01 alignment | VIVEKANANDA |
+| **Assessment-Data Lead** | Question bank, synthetic data generator, & validation | VISHNUTEJ |
+| **Algorithm Lead** | Deterministic adaptive engine, bottleneck investigator | AKSHAY |
+| **Teacher-UX Lead** | Command Center, Classroom Map, Conductor, & WHY Panel | VISHNUTEJ |
+| **Chassis-Integration Lead** | Repo conversion, Supabase Auth/RLS, & Gemini integration | DHANUSH |
 
 ---
 
@@ -195,11 +195,13 @@ npm run dev
 
 ## 📸 11. Screen Previews
 
-- **Command Center:** `[REPLACE_WITH_REAL_CAPTURE]`
-- **Assessment Conductor (Child Off-Screen):** `[REPLACE_WITH_REAL_CAPTURE]`
-- **Classroom Learning Map (Heatmap):** `[REPLACE_WITH_REAL_CAPTURE]`
-- **WHY Panel & Learning DNA:** `[REPLACE_WITH_REAL_CAPTURE]`
-- **Student Quest View:** `[REPLACE_WITH_REAL_CAPTURE]`
+
+- **Assessment Conductor (Child Off-Screen):** `<img width="947" height="505" alt="image" src="https://github.com/user-attachments/assets/c1ced11b-d6b0-450b-bf3e-c326274cd208" />
+`
+- **Classroom Learning Map (Heatmap):** `<img width="759" height="435" alt="image" src="https://github.com/user-attachments/assets/daef436a-11e4-4ddf-8018-2cd5295fecbe" />
+`
+- **Student Quest View:** `<img width="719" height="439" alt="image" src="https://github.com/user-attachments/assets/4492eb60-2520-47d5-a4a7-60dcfe322642" />
+`
 
 ---
 
