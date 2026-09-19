@@ -28,6 +28,7 @@ interface MockDbSchema {
   webauthn_credentials: any[];
   sessions_log: any[];
   backup_codes: any[];
+  pragya_learners: any[];
   // Quiz tables
   quiz_subjects: any[];
   quiz_topics: any[];
@@ -44,6 +45,7 @@ const DEFAULT_DB: MockDbSchema = {
   webauthn_credentials: [],
   sessions_log: [],
   backup_codes: [],
+  pragya_learners: [],
   quiz_subjects: [],
   quiz_topics: [],
   quiz_questions: [],
@@ -75,6 +77,7 @@ export function getMockDb(): MockDbSchema {
     if (!db.quiz_attempts) db.quiz_attempts = [];
     if (!db.quiz_attempt_answers) db.quiz_attempt_answers = [];
     if (!db.quiz_files) db.quiz_files = [];
+    if (!db.pragya_learners) db.pragya_learners = [];
 
     // Seed quiz data if tables are empty
     if (db.quiz_subjects.length === 0) {

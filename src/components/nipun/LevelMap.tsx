@@ -9,6 +9,7 @@ import {
   ArrowRight, Play, Award, Tent, Mountain, Trees, Droplets, Castle, User, Sparkles
 } from 'lucide-react';
 import { getReadingWorldStages, getNumeracyWorldStages } from '@/lib/nipun/syntheticData';
+import { LEVEL_TO_NCERT } from '@/lib/nipun/ncertSyllabus';
 import { WorldStage } from '@/lib/nipun/types';
 import { useStudent } from '@/lib/nipun/StudentContext';
 import LevelUpModal from './LevelUpModal';
@@ -267,6 +268,11 @@ export default function LevelMap() {
                 <p className="text-xs text-gray-600 font-medium">
                   {selectedStage.description}
                 </p>
+                {LEVEL_TO_NCERT[selectedStage.level] && (
+                  <p className="text-[11px] font-bold text-emerald-700 mt-1">
+                    NCERT: {LEVEL_TO_NCERT[selectedStage.level].chapters}
+                  </p>
+                )}
               </div>
             </div>
 

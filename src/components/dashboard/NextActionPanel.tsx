@@ -3,17 +3,16 @@ import React from 'react';
 import { Target, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import type { PragyaLearner } from '@/lib/types';
+import { getNumeracyBottleneck } from '@/lib/nipun/ncertSyllabus';
 
 export default function NextActionPanel({ learners }: { learners: PragyaLearner[] }) {
   if (learners.length === 0) return null;
 
-  // Filter students struggling with Number Recognition / foundational math
-  const strugglingStudents = learners.filter(l => 
-    l.numeracy_level === 'beginner' || 
-    l.numeracy_level === 'number-recognition-1-9' || 
-    l.numeracy_level === 'number-recognition-11-99' ||
-    l.status === 'needs-support'
-  ).slice(0, 4);
+  // Data-driven bottleneck: the foundational NCERT-mapped numeracy stage where
+  // the most learners are currently stalled.
+  const bottleneck = getNumeracyBottleneck(learners);
+  if (!bottleneck) return null;
+  const strugglingStudents = bottleneck.students.slice(0, 4);
 
   return (
     <motion.div 
@@ -29,16 +28,16 @@ export default function NextActionPanel({ learners }: { learners: PragyaLearner[
             <Target className="w-5 h-5 stroke-[2.2]" />
           </div>
           <h3 className="text-xl font-extrabold text-[#3a1d0d] font-heading tracking-tight">
-            Today's Focus
+            Today&apos;s Focus
           </h3>
         </div>
 
-        {/* Bottleneck Alert */}
+        {/* Bottleneck Alert — computed from real learner levels on the NCERT ladder */}
         <p className="text-[#4a2612] font-semibold text-sm leading-relaxed mb-5">
-          Your class is struggling most with <strong className="text-[#2a0e02] font-extrabold underline decoration-orange-400/80 underline-offset-2">Number Recognition (11–99)</strong>.
+          Your class is working most on <strong className="text-[#2a0e02] font-extrabold underline decoration-orange-400/80 underline-offset-2">{bottleneck.label}</strong>.
           <br />
           <span className="font-extrabold text-[#3a1d0d] block mt-1">
-            4 students dropped off at this specific bottleneck.
+            {bottleneck.count} student{bottleneck.count !== 1 ? 's' : ''} currently at this stage — {bottleneck.chapterRef}.
           </span>
         </p>
         
@@ -51,10 +50,10 @@ export default function NextActionPanel({ learners }: { learners: PragyaLearner[
               className="bg-white/90 backdrop-blur-sm pr-3.5 pl-1.5 py-1 rounded-full flex items-center gap-2 border border-orange-200/80 shadow-xs cursor-pointer"
             >
               <div className="w-6 h-6 rounded-full overflow-hidden bg-orange-100 flex items-center justify-center shrink-0 border border-orange-200">
-                {l.avatar_emoji?.startsWith('http') || l.avatar_emoji?.startsWith('/') ? (
-                  <img src={l.avatar_emoji} alt={l.name} className="w-full h-full object-cover" />
+                {l.avatar?.startsWith('http') || l.avatar?.startsWith('/') ? (
+                  <img src={l.avatar} alt={l.name} className="w-full h-full object-cover" />
                 ) : (
-                  <span className="text-xs">{l.avatar_emoji}</span>
+                  <span className="text-xs">{l.avatar}</span>
                 )}
               </div>
               <span className="text-xs font-extrabold text-orange-950">{l.name.split(' ')[0]}</span>
@@ -68,7 +67,7 @@ export default function NextActionPanel({ learners }: { learners: PragyaLearner[
             <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" /> RECOMMENDED ACTIVITY
           </p>
           <p className="text-sm font-extrabold text-[#2a1309] leading-snug">
-            15-minute "Number Bingo" session using flashcards.
+            {bottleneck.activity}
           </p>
         </div>
       </div>

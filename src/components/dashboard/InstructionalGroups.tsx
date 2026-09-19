@@ -1,22 +1,94 @@
 'use client';
 import React from 'react';
 import type { PragyaLearner } from '@/lib/types';
-import { Sparkles, Users } from 'lucide-react';
+import { Sparkles, Users, BookOpen, Calculator } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { getInstructionalGroups, InstructionalGroup } from '@/lib/nipun/ncertSyllabus';
+
+const GROUP_STYLES: Record<string, { bg: string; border: string; heading: string; text: string; chipBorder: string; chipBg: string }> = {
+  reading: {
+    bg: 'bg-[#f0f7ff]',
+    border: 'border-[#e0edff]',
+    heading: 'text-[#1e3a8a]',
+    text: 'text-blue-900/80',
+    chipBorder: 'border-blue-100',
+    chipBg: 'bg-blue-50',
+  },
+  numeracy: {
+    bg: 'bg-[#fff7ed]',
+    border: 'border-[#ffedd5]',
+    heading: 'text-[#7c2d12]',
+    text: 'text-orange-900/80',
+    chipBorder: 'border-orange-100',
+    chipBg: 'bg-orange-50',
+  },
+};
+
+function GroupCard({ group }: { group: InstructionalGroup }) {
+  const s = GROUP_STYLES[group.subject];
+  const Icon = group.subject === 'reading' ? BookOpen : Calculator;
+
+  return (
+    <div className={`p-5 rounded-2xl ${s.bg} ${s.border} border flex flex-col`}>
+      <div className="flex items-center justify-between mb-1.5">
+        <h4 className={`font-extrabold ${s.heading} text-sm flex items-center gap-2`}>
+          {group.subject === 'reading' ? (
+            <Users className="w-4 h-4 stroke-[2.2]" />
+          ) : (
+            <Users className="w-4 h-4 stroke-[2.2]" />
+          )}
+          Group: {group.name}
+        </h4>
+        <span className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${s.chipBg} ${s.heading} border ${s.chipBorder} flex items-center gap-1`}>
+          <Icon className="w-3 h-3" />
+          {group.students.length} learner{group.students.length !== 1 ? 's' : ''}
+        </span>
+      </div>
+
+      <p className="text-[11px] font-extrabold text-zinc-700 uppercase tracking-wider mb-1.5">
+        {group.chapterRef}
+      </p>
+      <p className={`text-xs font-medium ${s.text} leading-relaxed mb-4`}>
+        {group.need}
+      </p>
+
+      <div className="flex flex-wrap gap-2 mb-4">
+        {group.students.map(l => (
+          <motion.div
+            key={l.id}
+            whileHover={{ scale: 1.04 }}
+            className={`bg-white px-3 py-1 rounded-full flex items-center gap-2 border ${s.chipBorder} shadow-2xs cursor-pointer`}
+          >
+            <div className={`w-5 h-5 rounded-full overflow-hidden ${s.chipBg} flex items-center justify-center shrink-0 border ${s.chipBorder}`}>
+              {l.avatar?.startsWith('http') || l.avatar?.startsWith('/') ? (
+                <img src={l.avatar} alt={l.name} className="w-full h-full object-cover" />
+              ) : (
+                <span className="text-[10px]">{l.avatar}</span>
+              )}
+            </div>
+            <span className="text-xs font-bold text-zinc-800">{l.name}</span>
+          </motion.div>
+        ))}
+      </div>
+
+      <div className="mt-auto bg-white/80 rounded-xl p-3 border border-white">
+        <p className="text-[10px] font-extrabold uppercase tracking-wider text-zinc-500 mb-1">Recommended activity</p>
+        <p className="text-xs font-bold text-zinc-800 leading-snug">{group.activity}</p>
+      </div>
+    </div>
+  );
+}
 
 export default function InstructionalGroups({ learners }: { learners: PragyaLearner[] }) {
   if (learners.length === 0) return null;
 
-  const groupAStudents = learners.filter(l => 
-    l.reading_level === 'beginner' || l.reading_level === 'letter' || l.status === 'needs-support'
-  ).slice(0, 4);
-
-  const groupBStudents = learners.filter(l => 
-    l.reading_level === 'word' || l.reading_level === 'paragraph' || l.status === 'developing'
-  ).slice(0, 5);
+  // Data-driven grouping by COMMON INSTRUCTIONAL NEED, each mapped to
+  // actual NCERT Class 3 chapters (Maths Mela / Santoor).
+  const groups = getInstructionalGroups(learners);
+  if (groups.length === 0) return null;
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.1 }}
@@ -29,67 +101,12 @@ export default function InstructionalGroups({ learners }: { learners: PragyaLear
           AI Grouping Recommendations
         </h3>
       </div>
-      
-      <div className="space-y-4">
-        {/* Group A: Phonics & Letters */}
-        <div className="p-5 rounded-2xl bg-[#f0f7ff] border border-[#e0edff] flex flex-col">
-          <h4 className="font-extrabold text-[#1e3a8a] text-sm mb-1.5 flex items-center gap-2">
-            <Users className="w-4 h-4 stroke-[2.2]" /> Group A: Phonics & Letters
-          </h4>
-          <p className="text-xs font-medium text-blue-900/80 leading-relaxed mb-4">
-            These students need targeted support in recognizing basic alphabets and phonics sounds.
-          </p>
-          
-          <div className="flex flex-wrap gap-2">
-            {groupAStudents.map(l => (
-              <motion.div 
-                key={l.id} 
-                whileHover={{ scale: 1.04 }}
-                className="bg-white px-3 py-1 rounded-full flex items-center gap-2 border border-blue-100 shadow-2xs cursor-pointer"
-              >
-                <div className="w-5 h-5 rounded-full overflow-hidden bg-blue-50 flex items-center justify-center shrink-0 border border-blue-200">
-                  {l.avatar_emoji?.startsWith('http') || l.avatar_emoji?.startsWith('/') ? (
-                    <img src={l.avatar_emoji} alt={l.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-[10px]">{l.avatar_emoji}</span>
-                  )}
-                </div>
-                <span className="text-xs font-bold text-zinc-800">{l.name}</span>
-              </motion.div>
-            ))}
-          </div>
-        </div>
 
-        {/* Group B: Word Blending */}
-        <div className="p-5 rounded-2xl bg-[#fcf5ff] border border-[#f3e8ff] flex flex-col">
-          <h4 className="font-extrabold text-[#581c87] text-sm mb-1.5 flex items-center gap-2">
-            <Users className="w-4 h-4 stroke-[2.2]" /> Group B: Word Blending
-          </h4>
-          <p className="text-xs font-medium text-purple-900/80 leading-relaxed mb-4">
-            These students know their letters but need help blending them into simple words.
-          </p>
-          
-          <div className="flex flex-wrap gap-2">
-            {groupBStudents.map(l => (
-              <motion.div 
-                key={l.id} 
-                whileHover={{ scale: 1.04 }}
-                className="bg-white px-3 py-1 rounded-full flex items-center gap-2 border border-purple-100 shadow-2xs cursor-pointer"
-              >
-                <div className="w-5 h-5 rounded-full overflow-hidden bg-purple-50 flex items-center justify-center shrink-0 border border-purple-200">
-                  {l.avatar_emoji?.startsWith('http') || l.avatar_emoji?.startsWith('/') ? (
-                    <img src={l.avatar_emoji} alt={l.name} className="w-full h-full object-cover" />
-                  ) : (
-                    <span className="text-[10px]">{l.avatar_emoji}</span>
-                  )}
-                </div>
-                <span className="text-xs font-bold text-zinc-800">{l.name}</span>
-              </motion.div>
-            ))}
-          </div>
-        </div>
+      <div className="space-y-4">
+        {groups.map(group => (
+          <GroupCard key={group.id} group={group} />
+        ))}
       </div>
     </motion.div>
   );
 }
-

@@ -5,11 +5,9 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Volume2, ArrowRight, ArrowLeft, CheckCircle2, Sparkles, Loader2, Mic, MicOff } from 'lucide-react';
-import { MOCK_PRACTICE_QUESTIONS } from '@/lib/nipun/syntheticData';
+import { getSyllabusQuestions, getChapterLabel, NcertQuestion } from '@/lib/nipun/ncertSyllabus';
 import { useStudent } from '@/lib/nipun/StudentContext';
 import MasteryChallenge from './MasteryChallenge';
-
-// Types are provided by standard library or we can cast to any when needed
 
 export default function PracticeZone() {
   const searchParams = useSearchParams();
@@ -65,7 +63,9 @@ export default function PracticeZone() {
   if (isLoading) return <div className="flex justify-center p-12"><Loader2 className="w-8 h-8 animate-spin text-amber-500" /></div>;
   if (!learner) return null;
 
-  const questions = MOCK_PRACTICE_QUESTIONS.filter(q => q.pathway === pathwayParam) || MOCK_PRACTICE_QUESTIONS;
+  // NCERT Class 3 syllabus questions for this pathway, starting at the learner's current level
+  const currentLevel = pathwayParam === 'numeracy' ? learner.numeracyLevel : learner.readingLevel;
+  const questions: NcertQuestion[] = getSyllabusQuestions(pathwayParam, String(currentLevel));
   const currentQ = questions[currentIdx] || questions[0];
 
   const handlePlayAudio = (text?: string) => {
@@ -147,7 +147,11 @@ export default function PracticeZone() {
             <ArrowLeft className="w-5 h-5" />
           </Link>
         </div>
-        <MasteryChallenge conceptName={pathwayParam === 'reading' ? 'Paragraph Explorer' : 'Subtraction Solver'} />
+        <MasteryChallenge
+          conceptName={pathwayParam === 'reading' ? 'Paragraph Explorer' : 'Subtraction Solver'}
+          pathway={pathwayParam}
+          level={String(currentLevel)}
+        />
       </div>
     );
   }
@@ -196,6 +200,11 @@ export default function PracticeZone() {
           <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white leading-tight" style={{ textShadow: '0 4px 10px rgba(0,0,0,1), 0 2px 4px rgba(0,0,0,1)' }}>
             {currentQ.content}
           </h2>
+          {currentQ && (
+            <p className="text-[11px] sm:text-xs font-bold text-amber-300/90 uppercase tracking-widest drop-shadow-[0_2px_4px_rgba(0,0,0,1)]">
+              {getChapterLabel(currentQ)}
+            </p>
+          )}
         </div>
 
         {/* SPACER TO PUSH CAVES TO THE BOTTOM */}
@@ -253,7 +262,7 @@ export default function PracticeZone() {
                 </button>
                 {transcript && (
                   <p className="mt-2 text-amber-300 font-black text-xl drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)]">
-                    "{transcript}"
+                    &ldquo;{transcript}&rdquo;
                   </p>
                 )}
               </div>
