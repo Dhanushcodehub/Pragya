@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -8,6 +8,7 @@ import { Volume2, ArrowRight, ArrowLeft, CheckCircle2, Sparkles, Loader2, Mic, M
 import { getSyllabusQuestions, getChapterLabel, NCERT_CLASS_3_QUESTION_BANK, NcertQuestion } from '@/lib/nipun/ncertSyllabus';
 import { ReadingLevel, NumeracyLevel } from '@/lib/nipun/types';
 import { useStudent } from '@/lib/nipun/StudentContext';
+import { recordAttempt, createQuestionTimer } from '@/lib/nipun/attemptRecorder';
 import MasteryChallenge from './MasteryChallenge';
 
 export default function PracticeZone() {
@@ -23,42 +24,11 @@ export default function PracticeZone() {
   
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState('');
-  const [recognition, setRecognition] = useState<any>(null);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const anyWindow = window as any;
-      const SpeechRecognition = anyWindow.SpeechRecognition || anyWindow.webkitSpeechRecognition;
-      if (SpeechRecognition) {
-        const reco = new SpeechRecognition();
-        reco.continuous = false;
-        reco.interimResults = false;
-        reco.lang = 'en-US';
-
-        reco.onstart = () => {
-          setIsListening(true);
-          setTranscript('');
-        };
-
-        reco.onresult = (event: any) => {
-          const current = event.resultIndex;
-          const transcriptText = event.results[current][0].transcript;
-          setTranscript(transcriptText);
-          handleVoiceCommand(transcriptText);
-        };
-
-        reco.onerror = (event: any) => {
-          setIsListening(false);
-        };
-
-        reco.onend = () => {
-          setIsListening(false);
-        };
-
-        setRecognition(reco);
-      }
-    }
-  }, []);
+  const recognitionRef = useRef<any>(null);
+  const [hasVoiceSupport] = useState(() =>
+    typeof window !== 'undefined' &&
+    Boolean((window as any).SpeechRecognition || (window as any).webkitSpeechRecognition)
+  );
 
   // NCERT Class 3 level ladders
   const readingLadder: ReadingLevel[] = ['letter', 'word', 'paragraph', 'story'];
@@ -123,6 +93,12 @@ export default function PracticeZone() {
   const [currentQ, setCurrentQ] = useState<NcertQuestion>(() => {
     return getNextAdaptiveQuestion(getInitialLevelIdx(), 'medium', []);
   });
+  const timerRef = useRef<ReturnType<typeof createQuestionTimer> | null>(null);
+  // (Re)start the response-time stopwatch whenever a new question is shown.
+  useEffect(() => {
+    if (!timerRef.current) timerRef.current = createQuestionTimer();
+    timerRef.current.start();
+  }, [currentQ.id]);
 
   // Early returns AFTER all hooks (rules-of-hooks)
   if (isLoading) return <div className="flex justify-center p-12"><Loader2 className="w-8 h-8 animate-spin text-amber-500" /></div>;
@@ -142,39 +118,28 @@ export default function PracticeZone() {
     setSelectedOption(opt);
   };
 
-  const handleVoiceCommand = (text: string) => {
-    if (isSubmitted) return;
-    const lowerText = text.toLowerCase().trim();
-    
-    let matchedOpt: string | null = null;
-    currentQ.options.forEach((opt, index) => {
-      const letter = String.fromCharCode(65 + index).toLowerCase();
-      if (lowerText === letter || lowerText === `option ${letter}` || lowerText.includes(opt.toLowerCase())) {
-        matchedOpt = opt;
-      }
-    });
-
-    if (matchedOpt) {
-      const finalOpt: string = matchedOpt;
-      setSelectedOption(finalOpt);
-      setTimeout(() => submitSpecificAnswer(finalOpt), 1000);
-    }
-  };
-
-  const toggleListening = () => {
-    if (isListening) {
-      recognition?.stop();
-    } else {
-      recognition?.start();
-    }
-  };
-
   const submitSpecificAnswer = (opt: string) => {
     setIsSubmitted(true);
     setAttemptedIds(prev => [...prev, currentQ.id]);
     setQuestionsAnswered(prev => prev + 1);
 
     const isRight = opt === currentQ.correctAnswer;
+
+    // Real-time telemetry: log every answered question for the live analytics dashboard
+    if (learner) {
+      recordAttempt({
+        learnerId: learner.id,
+        pathway: pathwayParam === 'numeracy' ? 'numeracy' : 'reading',
+        level: ladder[levelIdx],
+        questionId: currentQ.id,
+        chapterNo: currentQ.chapterNo,
+        chapterName: currentQ.chapterName,
+        subject: currentQ.subject,
+        isCorrect: isRight,
+        timeMs: timerRef.current?.elapsedMs() ?? null,
+        mode: 'practice',
+      });
+    }
 
     if (isRight) {
       setTotalXp(prev => prev + currentQ.xp);
@@ -221,6 +186,75 @@ export default function PracticeZone() {
     }
   };
 
+  const handleVoiceCommand = (text: string) => {
+    if (isSubmitted) return;
+    const lowerText = text.toLowerCase().trim();
+    
+    let matchedOpt: string | null = null;
+    currentQ.options.forEach((opt, index) => {
+      const letter = String.fromCharCode(65 + index).toLowerCase();
+      if (lowerText === letter || lowerText === `option ${letter}` || lowerText.includes(opt.toLowerCase())) {
+        matchedOpt = opt;
+      }
+    });
+
+    if (matchedOpt) {
+      const finalOpt: string = matchedOpt;
+      setSelectedOption(finalOpt);
+      setTimeout(() => submitSpecificAnswer(finalOpt), 1000);
+    }
+  };
+
+  // Keep a stable ref to the latest voice handler so the mount-only
+  // recognition effect never suffers stale closures.
+  const voiceHandlerRef = useRef<(text: string) => void>(() => {});
+  useEffect(() => {
+    voiceHandlerRef.current = handleVoiceCommand;
+  });
+
+  // Speech recognition setup (mount only; delegates to the latest handler)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const anyWindow = window as any;
+    const SpeechRecognition = anyWindow.SpeechRecognition || anyWindow.webkitSpeechRecognition;
+    if (!SpeechRecognition) return;
+
+    const reco = new SpeechRecognition();
+    reco.continuous = false;
+    reco.interimResults = false;
+    reco.lang = 'en-US';
+
+    reco.onstart = () => {
+      setIsListening(true);
+      setTranscript('');
+    };
+
+    reco.onresult = (event: any) => {
+      const current = event.resultIndex;
+      const transcriptText = event.results[current][0].transcript;
+      setTranscript(transcriptText);
+      voiceHandlerRef.current(transcriptText);
+    };
+
+    reco.onerror = () => {
+      setIsListening(false);
+    };
+
+    reco.onend = () => {
+      setIsListening(false);
+    };
+
+    recognitionRef.current = reco;
+  }, []);
+
+  const toggleListening = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+    } else {
+      recognitionRef.current?.start();
+    }
+  };
+
   const handleSubmitAnswer = () => {
     if (!selectedOption) return;
     submitSpecificAnswer(selectedOption);
@@ -230,6 +264,7 @@ export default function PracticeZone() {
     setSelectedOption(null);
     setIsSubmitted(false);
     setTranscript('');
+    timerRef.current?.start();
 
     if (questionsAnswered >= 6) {
       setShowChallenge(true);
@@ -238,6 +273,10 @@ export default function PracticeZone() {
       setCurrentQ(nextQ);
     }
   };
+
+  // Early returns AFTER all hooks (rules-of-hooks: hook count must not change between renders)
+  if (isLoading) return <div className="flex justify-center p-12"><Loader2 className="w-8 h-8 animate-spin text-amber-500" /></div>;
+  if (!learner) return null;
 
   if (showChallenge) {
     return (
@@ -374,7 +413,7 @@ export default function PracticeZone() {
           {/* VOICE & BUTTONS */}
           <div className="flex flex-col items-center">
             {/* VOICE TO TEXT */}
-            {!isSubmitted && recognition && (
+            {!isSubmitted && hasVoiceSupport && (
               <div className="flex flex-col items-center mb-4">
                 <button
                   onClick={toggleListening}

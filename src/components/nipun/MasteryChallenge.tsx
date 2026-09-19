@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import { recordAttempt, createQuestionTimer } from '@/lib/nipun/attemptRecorder';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Sparkles, Volume2 } from 'lucide-react';
@@ -23,6 +24,13 @@ export default function MasteryChallenge({
   const [currentIdx, setCurrentIdx] = useState(0);
   const [score, setScore] = useState(0);
   const [lastCorrect, setLastCorrect] = useState<boolean | null>(null);
+  const timerRef = useRef<ReturnType<typeof createQuestionTimer> | null>(null);
+  // (Re)start the response-time stopwatch whenever a new question is shown.
+  React.useEffect(() => {
+    if (!timerRef.current) timerRef.current = createQuestionTimer();
+    timerRef.current.start();
+  }, [step, currentIdx]);
+  const learnerId = typeof window !== 'undefined' ? localStorage.getItem('pragya_student_id') : null;
 
   // Mastery-verification questions selected from the NCERT Class 3 syllabus bank
   const challengeQuestions: NcertQuestion[] = getMasteryChallengeQuestions(pathway, level);
@@ -37,9 +45,27 @@ export default function MasteryChallenge({
   };
 
   const handleSelectOption = (opt: string) => {
-    const isCorrect = opt === challengeQuestions[currentIdx].correctAnswer;
+    const q = challengeQuestions[currentIdx];
+    const isCorrect = opt === q.correctAnswer;
     if (isCorrect) setScore(prev => prev + 1);
     setLastCorrect(isCorrect);
+
+    // Real-time telemetry for the teacher dashboard
+    if (learnerId) {
+      recordAttempt({
+        learnerId,
+        pathway: pathway === 'numeracy' ? 'numeracy' : 'reading',
+        level,
+        questionId: q.id,
+        chapterNo: q.chapterNo,
+        chapterName: q.chapterName,
+        subject: q.subject,
+        isCorrect,
+        timeMs: timerRef.current?.elapsedMs() ?? null,
+        mode: 'challenge',
+      });
+    }
+    timerRef.current?.start();
 
     if (currentIdx + 1 < challengeQuestions.length) {
       setTimeout(() => {

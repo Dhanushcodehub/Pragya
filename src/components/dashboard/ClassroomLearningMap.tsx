@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import type { PragyaLearner } from '@/lib/types';
 import { BookOpen, Hash, Filter, X, Star, TrendingUp } from 'lucide-react';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
+import StudentLiveAnalytics from './StudentLiveAnalytics';
 
 // Stagger container: children animate in sequence
 const gridVariants: Variants = {
@@ -53,10 +54,10 @@ const getStatusBg = (status: string) => {
 };
 
 const formatLevel = (level: string) => {
-  if (level === 'not-assessed') return '—';
-  if (level === 'number-recognition-1-9') return 'Number Recognition 1 9';
-  if (level === 'number-recognition-11-99') return 'Number Recognition 11 99';
-  return level.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+  if (!level || level === 'not-assessed') return '—';
+  if (level === 'number-recognition-1-9' || level === 'number_1_9') return 'Numbers 1 – 9';
+  if (level === 'number-recognition-11-99' || level === 'number_11_99') return 'Numbers 11 – 99';
+  return level.split(/[-_]/).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 };
 
 type FilterOption = 'all' | 'secure' | 'developing' | 'needs-support';
@@ -64,10 +65,15 @@ type FilterOption = 'all' | 'secure' | 'developing' | 'needs-support';
 export default function ClassroomLearningMap({ learners }: { learners: PragyaLearner[] }) {
   const [filter, setFilter] = useState<FilterOption>('all');
   const [currentPage, setCurrentPage] = useState(1);
+  const [prevFilter, setPrevFilter] = useState<FilterOption>(filter);
   const [selectedLearner, setSelectedLearner] = useState<PragyaLearner | null>(null);
   const itemsPerPage = 8;
 
-  useEffect(() => { setCurrentPage(1); }, [filter]);
+  // Adjust state during render (React-endorsed reset-on-prop-change pattern)
+  if (filter !== prevFilter) {
+    setPrevFilter(filter);
+    setCurrentPage(1);
+  }
 
   // Close on Escape key
   useEffect(() => {
@@ -141,49 +147,50 @@ export default function ClassroomLearningMap({ learners }: { learners: PragyaLea
                       whileHover={{ y: -4, boxShadow: '0 8px 24px -4px rgba(0,0,0,0.10)', transition: { type: 'spring', stiffness: 400, damping: 28 } }}
                       whileTap={{ scale: 0.98 }}
                       onClick={() => setSelectedLearner(learner)}
-                      className="bg-white rounded-2xl p-5 border border-zinc-200/80 shadow-2xs cursor-pointer flex flex-col justify-between"
+                      className="group relative cursor-pointer bg-white rounded-3xl p-5 border border-zinc-200/80 shadow-xs hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between"
                     >
-                      {/* Top Row: Avatar + Name + PIN */}
                       <div>
-                        <div className="flex items-center gap-3 mb-3">
-                          <div className="w-12 h-12 flex items-center justify-center rounded-full shadow-xs overflow-hidden bg-zinc-50 border border-zinc-100 shrink-0">
+                        {/* Status Top Badge */}
+                        <div className="flex justify-between items-start mb-3">
+                          <div className="w-14 h-14 rounded-2xl overflow-hidden border-2 border-zinc-100 shadow-xs bg-zinc-50 flex items-center justify-center text-2xl group-hover:scale-105 transition-transform">
                             {learner.avatar_emoji?.startsWith('/') || learner.avatar_emoji?.startsWith('http') ? (
                               <img src={learner.avatar_emoji} alt={learner.name} className="w-full h-full object-cover" />
                             ) : (
-                              <span className="text-2xl">{learner.avatar_emoji}</span>
+                              <span>{learner.avatar_emoji || '🎒'}</span>
                             )}
                           </div>
-                          <div className="min-w-0">
-                            <div className="text-zinc-900 font-extrabold text-base leading-tight truncate">{learner.name}</div>
-                            <div className="text-[11px] text-zinc-500 font-mono font-medium mt-0.5 flex flex-col leading-tight">
-                              <span>Code: <strong className="text-zinc-800 font-bold">{learner.class_code}</strong></span>
-                              <span>PIN: <strong className="text-zinc-800 font-bold">{learner.secret_pin}</strong></span>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        {/* Status Badge Tag */}
-                        <div className="mb-4">
-                          <span className={`inline-block px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider rounded-full border ${getStatusBadgeStyle(learner.status)}`}>
+                          <span className={`px-2.5 py-0.5 text-[9px] font-extrabold uppercase tracking-wider rounded-full border ${getStatusBadgeStyle(learner.status)}`}>
                             {learner.status.replace('-', ' ')}
                           </span>
                         </div>
+
+                        <h4 className="font-extrabold text-base text-zinc-900 font-heading group-hover:text-amber-600 transition-colors truncate">
+                          {learner.name}
+                        </h4>
+                        <p className="text-[11px] text-zinc-400 font-mono mt-0.5">
+                          {learner.class_code} · PIN: {learner.secret_pin}
+                        </p>
+
+                        {/* Pathway Levels */}
+                        <div className="mt-4 space-y-1.5 pt-3 border-t border-zinc-100">
+                          <div className="flex justify-between items-center text-xs">
+                            <span className="text-zinc-500 font-medium flex items-center gap-1">
+                              <BookOpen className="w-3 h-3 text-blue-500" /> Reading
+                            </span>
+                            <span className="font-bold text-zinc-800 text-[11px]">{formatLevel(learner.reading_level)}</span>
+                          </div>
+                          <div className="flex justify-between items-center text-xs">
+                            <span className="text-zinc-500 font-medium flex items-center gap-1">
+                              <Hash className="w-3 h-3 text-purple-500" /> Math
+                            </span>
+                            <span className="font-bold text-zinc-800 text-[11px]">{formatLevel(learner.numeracy_level)}</span>
+                          </div>
+                        </div>
                       </div>
 
-                      {/* Metrics Box */}
-                      <div className="space-y-2 pt-2 border-t border-zinc-100">
-                        <div className="flex items-center justify-between text-xs p-1.5 rounded-lg bg-zinc-50/70">
-                          <div className="flex items-center gap-1.5 font-bold text-zinc-500">
-                            <BookOpen className="w-3.5 h-3.5 text-zinc-400"/> Reading
-                          </div>
-                          <div className="font-extrabold text-zinc-800">{formatLevel(learner.reading_level)}</div>
-                        </div>
-                        <div className="flex items-center justify-between text-xs p-1.5 rounded-lg bg-zinc-50/70">
-                          <div className="flex items-center gap-1.5 font-bold text-zinc-500">
-                            <Hash className="w-3.5 h-3.5 text-zinc-400"/> Math
-                          </div>
-                          <div className="font-extrabold text-zinc-800">{formatLevel(learner.numeracy_level)}</div>
-                        </div>
+                      <div className="mt-4 pt-3 border-t border-zinc-100 flex items-center justify-between text-[11px] text-amber-700 font-bold group-hover:translate-x-0.5 transition-transform">
+                        <span>View Analytics</span>
+                        <span>→</span>
                       </div>
                     </motion.div>
                   ))}
@@ -192,37 +199,24 @@ export default function ClassroomLearningMap({ learners }: { learners: PragyaLea
 
               {/* Pagination Controls */}
               {totalPages > 1 && (
-                <div className="flex justify-center mt-2">
-                  <div className="inline-flex rounded-2xl border border-zinc-800/80 overflow-hidden shadow-md bg-[#181920]">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                      <button
-                        key={page}
-                        onClick={() => setCurrentPage(page)}
-                        className={`px-4.5 py-2.5 text-xs font-semibold border-r border-zinc-800/70 transition-all focus:outline-none 
-                          ${currentPage === page 
-                            ? 'bg-[#0e0f14] text-[#fde047] font-extrabold' 
-                            : 'text-[#8cb3d9] hover:bg-zinc-800/60'
-                          }`}
-                      >
-                        {page}
-                      </button>
-                    ))}
-                    
-                    <button
-                      onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                      disabled={currentPage === totalPages}
-                      className="px-4.5 py-2.5 text-xs font-semibold text-[#8cb3d9] border-r border-zinc-800/70 hover:bg-zinc-800/60 transition-colors disabled:opacity-40 disabled:cursor-not-allowed focus:outline-none"
-                    >
-                      Next »
-                    </button>
-                    <button
-                      onClick={() => setCurrentPage(totalPages)}
-                      disabled={currentPage === totalPages}
-                      className="px-4.5 py-2.5 text-xs font-semibold text-[#8cb3d9] hover:bg-zinc-800/60 transition-colors disabled:opacity-40 disabled:cursor-not-allowed focus:outline-none"
-                    >
-                      Last »
-                    </button>
-                  </div>
+                <div className="mt-8 flex justify-center items-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="px-3 py-1 text-xs font-bold rounded-lg border border-zinc-200 bg-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-zinc-50"
+                  >
+                    Prev
+                  </button>
+                  <span className="text-xs text-zinc-500 font-medium">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <button
+                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-1 text-xs font-bold rounded-lg border border-zinc-200 bg-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-zinc-50"
+                  >
+                    Next
+                  </button>
                 </div>
               )}
             </div>
@@ -230,7 +224,7 @@ export default function ClassroomLearningMap({ learners }: { learners: PragyaLea
         </div>
       </div>
 
-      {/* ── Student Profile Modal ─────────────────────────────── */}
+      {/* ── Student Profile Modal (Widescreen Industry Level) ─────────────── */}
       <AnimatePresence>
         {selectedLearner && (
           <>
@@ -240,136 +234,122 @@ export default function ClassroomLearningMap({ learners }: { learners: PragyaLea
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setSelectedLearner(null)}
-              className="fixed inset-0 z-40 bg-zinc-900/50 backdrop-blur-sm"
+              className="fixed inset-0 z-[9998] bg-zinc-950/70 backdrop-blur-md"
             />
 
-            {/* Modal Box */}
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Modal Centered Wrapper */}
+            <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 overflow-y-auto pt-20 sm:pt-24 pb-8">
               <motion.div 
-                initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 10 }}
-                className="bg-white rounded-3xl shadow-2xl border border-zinc-200 w-full max-w-2xl overflow-hidden"
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-white rounded-[2.5rem] shadow-2xl border-2 border-zinc-200/90 w-full max-w-5xl max-h-[88vh] flex flex-col overflow-hidden relative my-auto"
               >
-                {/* Modal Header */}
-                <div className={`relative flex items-center gap-6 p-7 bg-gradient-to-r ${getStatusBg(selectedLearner.status)} border-b border-zinc-100`}>
-                  <div className="w-20 h-20 rounded-2xl overflow-hidden border-4 border-white shadow-md bg-zinc-100 shrink-0">
-                    {selectedLearner.avatar_emoji?.startsWith('/') || selectedLearner.avatar_emoji?.startsWith('http') ? (
-                      <img src={selectedLearner.avatar_emoji} alt={selectedLearner.name} className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-4xl flex items-center justify-center w-full h-full">{selectedLearner.avatar_emoji}</span>
-                    )}
-                  </div>
+                {/* Sticky Header */}
+                <div className={`sticky top-0 z-30 flex items-center justify-between gap-4 px-6 py-5 sm:px-8 sm:py-6 bg-gradient-to-r ${getStatusBg(selectedLearner.status)} border-b border-zinc-200/80 backdrop-blur-md`}>
+                  <div className="flex items-center gap-4 sm:gap-5 min-w-0">
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border-3 border-white shadow-md bg-zinc-100 shrink-0 flex items-center justify-center text-3xl sm:text-4xl">
+                      {selectedLearner.avatar_emoji?.startsWith('/') || selectedLearner.avatar_emoji?.startsWith('http') ? (
+                        <img src={selectedLearner.avatar_emoji} alt={selectedLearner.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <span>{selectedLearner.avatar_emoji || '🎒'}</span>
+                      )}
+                    </div>
 
-                  <div className="flex-1 min-w-0">
-                    <h2 className="text-2xl font-extrabold text-zinc-900 font-heading leading-tight">{selectedLearner.name}</h2>
-                    <div className="flex items-center gap-3 mt-2 flex-wrap">
-                      <span className={`px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider rounded-full border ${getStatusBadgeStyle(selectedLearner.status)}`}>
-                        {selectedLearner.status.replace('-', ' ')}
-                      </span>
-                      <span className="text-xs text-zinc-600 font-mono bg-white/80 px-2.5 py-1 rounded-lg border border-zinc-200/50">ID: {selectedLearner.class_code}</span>
-                      <span className="text-xs text-zinc-600 font-mono bg-white/80 px-2.5 py-1 rounded-lg border border-zinc-200/50">PIN: {selectedLearner.secret_pin}</span>
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <h2 className="text-2xl sm:text-3xl font-black text-zinc-900 font-heading leading-tight truncate">
+                          {selectedLearner.name}
+                        </h2>
+                        <span className={`px-3 py-1 text-[10px] font-extrabold uppercase tracking-wider rounded-full border ${getStatusBadgeStyle(selectedLearner.status)} shadow-xs`}>
+                          {selectedLearner.status.replace('-', ' ')}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 mt-1.5 flex-wrap text-xs text-zinc-700">
+                        <span className="font-mono bg-white/90 px-3 py-1 rounded-xl border border-zinc-200 font-bold">
+                          Student ID: <strong className="text-zinc-900">{selectedLearner.class_code}</strong>
+                        </span>
+                        <span className="font-mono bg-white/90 px-3 py-1 rounded-xl border border-zinc-200 font-bold">
+                          Login PIN: <strong className="text-amber-700">{selectedLearner.secret_pin}</strong>
+                        </span>
+                      </div>
                     </div>
                   </div>
 
                   <button
                     onClick={() => setSelectedLearner(null)}
-                    className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full bg-white/80 hover:bg-white shadow-xs text-zinc-500 hover:text-zinc-800 transition"
+                    aria-label="Close dialog"
+                    className="w-11 h-11 flex items-center justify-center rounded-full bg-white hover:bg-zinc-100 shadow-md text-zinc-700 hover:text-zinc-900 border border-zinc-200 transition-transform active:scale-95 shrink-0"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-5 h-5" />
                   </button>
                 </div>
 
-                {/* Modal Stats & Detailed Assessment Report */}
-                <div className="p-7 space-y-6 max-h-[70vh] overflow-y-auto">
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5 flex flex-col justify-between">
-                      <div className="flex items-center gap-2 mb-2">
-                        <BookOpen className="w-4 h-4 text-blue-600" />
-                        <span className="text-xs font-bold text-blue-700 uppercase tracking-wider">Reading Stage</span>
+                {/* Modal Body Scroll Area */}
+                <div className="flex-1 overflow-y-auto divide-y divide-zinc-100">
+                  {/* Foundational Level & AI Guidance Cards */}
+                  <div className="p-6 sm:p-8 grid grid-cols-1 md:grid-cols-3 gap-5 bg-zinc-50/40">
+                    <div className="bg-white border-2 border-blue-100/90 rounded-3xl p-5 shadow-xs flex flex-col justify-between hover:border-blue-300 transition-colors">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-xs font-black text-blue-700 uppercase tracking-wider flex items-center gap-1.5">
+                          <BookOpen className="w-4 h-4 text-blue-600" /> Reading Pathway
+                        </span>
+                        <span className="text-[10px] bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-bold border border-blue-200">
+                          NCERT Santoor
+                        </span>
                       </div>
-                      <div className="text-xl font-extrabold text-blue-950">{formatLevel(selectedLearner.reading_level)}</div>
-                      <TrendingUp className="w-4 h-4 text-blue-400 self-end mt-2" />
-                    </div>
-
-                    <div className="bg-purple-50 border border-purple-100 rounded-2xl p-5 flex flex-col justify-between">
-                      <div className="flex items-center gap-2 mb-2">
-                        <Hash className="w-4 h-4 text-purple-600" />
-                        <span className="text-xs font-bold text-purple-700 uppercase tracking-wider">Math Stage</span>
+                      <div className="text-2xl font-black text-blue-950 font-heading">
+                        {formatLevel(selectedLearner.reading_level)}
                       </div>
-                      <div className="text-xl font-extrabold text-purple-950">{formatLevel(selectedLearner.numeracy_level)}</div>
-                      <TrendingUp className="w-4 h-4 text-purple-400 self-end mt-2" />
-                    </div>
-
-                    <div className={`rounded-2xl p-5 border bg-gradient-to-br ${getStatusBg(selectedLearner.status)} flex flex-col justify-between`}>
-                      <div className="flex items-center gap-2 mb-2">
-                        <Star className="w-4 h-4 text-amber-500" />
-                        <span className="text-xs font-bold text-zinc-700 uppercase tracking-wider">Overall Status</span>
-                      </div>
-                      <p className="text-xs font-black uppercase text-zinc-800 leading-relaxed">
-                        {selectedLearner.status.replace('-', ' ')}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Detailed Diagnostic Assessment Report */}
-                  <div className="bg-zinc-50 border border-zinc-200/80 rounded-2xl p-5 space-y-4">
-                    <div className="flex items-center justify-between border-b border-zinc-200/80 pb-3">
-                      <h4 className="text-sm font-extrabold text-zinc-900 uppercase tracking-wider flex items-center gap-2">
-                        📊 Detailed Assessment & Diagnostic Summary
-                      </h4>
-                      <span className="text-[11px] font-mono font-bold text-zinc-500 bg-white px-2.5 py-1 rounded-lg border border-zinc-200">NCERT Class 5 Aligned</span>
-                    </div>
-
-                    {/* Skill Breakdown */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                      <div className="bg-white p-4 rounded-xl border border-zinc-200 space-y-2">
-                        <div className="font-extrabold text-zinc-800 flex justify-between">
-                          <span>📖 English Reading Comprehension</span>
-                          <span className="text-emerald-600 font-black">
-                            {selectedLearner.reading_level === 'story' ? '92% Mastery' : selectedLearner.reading_level === 'paragraph' ? '74% Mastery' : '45% Developing'}
-                          </span>
-                        </div>
-                        <p className="text-zinc-600 text-[11px]">
-                          {selectedLearner.reading_level === 'story'
-                            ? 'Fluent in NCERT Marigold comprehension stories, context clues & vocabulary.'
-                            : selectedLearner.reading_level === 'paragraph'
-                            ? 'Reads connected text smoothly; working on inferential comprehension.'
-                            : 'Focusing on letter-sound correspondence and word blending.'}
-                        </p>
-                      </div>
-
-                      <div className="bg-white p-4 rounded-xl border border-zinc-200 space-y-2">
-                        <div className="font-extrabold text-zinc-800 flex justify-between">
-                          <span>🧮 Math-Magic Numeracy</span>
-                          <span className="text-emerald-600 font-black">
-                            {selectedLearner.numeracy_level === 'division' ? '95% Mastery' : selectedLearner.numeracy_level === 'subtraction' ? '78% Mastery' : '50% Developing'}
-                          </span>
-                        </div>
-                        <p className="text-zinc-600 text-[11px]">
-                          {selectedLearner.numeracy_level === 'division'
-                            ? 'Mastered equal sharing, place value & LCM concepts from Math-Magic.'
-                            : selectedLearner.numeracy_level === 'subtraction'
-                            ? 'Strong 2-digit subtraction with regrouping; developing division fluency.'
-                            : 'Building foundational place-value sense & 2-digit number recognition.'}
-                        </p>
+                      <div className="flex items-center justify-between mt-3 pt-3 border-t border-blue-50 text-xs text-blue-700 font-semibold">
+                        <span>ASER Level Diagnostic</span>
+                        <TrendingUp className="w-4 h-4 text-blue-500" />
                       </div>
                     </div>
 
-                    {/* Targeted Teacher Recommendations */}
-                    <div className="bg-amber-500/10 border border-amber-300/60 rounded-xl p-4 text-xs space-y-1">
-                      <div className="font-extrabold text-amber-900 flex items-center gap-1.5">
-                        💡 Teacher Action Plan & Recommended Intervention:
+                    <div className="bg-white border-2 border-purple-100/90 rounded-3xl p-5 shadow-xs flex flex-col justify-between hover:border-purple-300 transition-colors">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-xs font-black text-purple-700 uppercase tracking-wider flex items-center gap-1.5">
+                          <Hash className="w-4 h-4 text-purple-600" /> Math Pathway
+                        </span>
+                        <span className="text-[10px] bg-purple-50 text-purple-700 px-2 py-0.5 rounded-full font-bold border border-purple-200">
+                          Maths Mela
+                        </span>
                       </div>
-                      <p className="text-amber-950 font-medium leading-normal">
+                      <div className="text-2xl font-black text-purple-950 font-heading">
+                        {formatLevel(selectedLearner.numeracy_level)}
+                      </div>
+                      <div className="flex items-center justify-between mt-3 pt-3 border-t border-purple-50 text-xs text-purple-700 font-semibold">
+                        <span>Foundation Diagnostic</span>
+                        <TrendingUp className="w-4 h-4 text-purple-500" />
+                      </div>
+                    </div>
+
+                    <div className={`bg-white border-2 border-amber-200/90 rounded-3xl p-5 shadow-xs flex flex-col justify-between hover:border-amber-300 transition-colors`}>
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-xs font-black text-amber-800 uppercase tracking-wider flex items-center gap-1.5">
+                          <Star className="w-4 h-4 text-amber-500 fill-amber-500" /> AI Pedagogical Tip
+                        </span>
+                        <span className="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-bold">
+                          Next Action
+                        </span>
+                      </div>
+                      <p className="text-xs font-bold text-zinc-800 leading-relaxed">
                         {selectedLearner.status === 'secure'
-                          ? 'Assign Class 5 NCERT Math-Magic challenge worksheets & story extension exercises.'
+                          ? 'Demonstrating secure foundational mastery. Introduce extension challenge puzzles & story comprehension.'
                           : selectedLearner.status === 'developing'
-                          ? 'Conduct 10-minute daily peer-guided subtraction & paragraph reading practice.'
-                          : 'Provide targeted 1-on-1 phonics & bundle-stick regrouping support in small groups.'}
+                          ? 'Developing well! Recommended: peer guided reading pairs & interactive number bonds practice.'
+                          : 'Needs foundational support: Schedule daily 10-min phonics & visual base-10 counting sessions.'}
                       </p>
+                      <div className="text-[11px] text-zinc-400 font-semibold mt-3 pt-3 border-t border-zinc-100">
+                        Adaptive recommendation updated live
+                      </div>
                     </div>
                   </div>
+
+                  {/* Real-time mastery analytics — live graphs from actual practice attempts */}
+                  <StudentLiveAnalytics learnerId={selectedLearner.id} />
                 </div>
               </motion.div>
             </div>

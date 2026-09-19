@@ -12,7 +12,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Bot, Send, Sparkles, Volume2, X, Loader2, MessageCircleHeart } from 'lucide-react';
+import { Bot, Send, Sparkles, Volume2, VolumeX, X, Loader2, MessageCircleHeart, Mic, MicOff, Lightbulb } from 'lucide-react';
 import { useStudent } from '@/lib/nipun/StudentContext';
 
 interface ChatMessage {
@@ -24,7 +24,7 @@ interface ChatMessage {
   time: number;
 }
 
-const WELCOME_CHIPS = ['How do I subtract?', 'Tell me about Badal and Moti', 'What is a half?', 'Solve 54 − 27'];
+const WELCOME_CHIPS = ['Give me a practice sum! 🧮', 'Tell me about Badal & Moti 🐶', 'How do I divide equally? 🍬', 'Explain subtraction with borrowing ✏️'];
 
 let localId = 0;
 const nextId = () => `msg-${++localId}-${Date.now()}`;
@@ -49,17 +49,44 @@ function BotAvatar({ size = 'w-8 h-8' }: { size?: string }) {
 }
 
 export default function StudentChatbot() {
-  const { learner } = useStudent();
+  const { learner, addXp } = useStudent();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [speakingId, setSpeakingId] = useState<string | null>(null);
   const [unreadCount, setUnreadCount] = useState(0);
+  const [autoSpeech, setAutoSpeech] = useState(true);
+  const [isListening, setIsListening] = useState(false);
+  const [recognition, setRecognition] = useState<any>(null);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [hasOpenedOnce, setHasOpenedOnce] = useState(false);
+
+  // Initialize Speech Recognition for Voice Input
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const anyWin = window as any;
+      const SpeechRecognition = anyWin.SpeechRecognition || anyWin.webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        const reco = new SpeechRecognition();
+        reco.continuous = false;
+        reco.interimResults = false;
+        reco.lang = 'en-IN';
+
+        reco.onstart = () => setIsListening(true);
+        reco.onresult = (e: any) => {
+          const text = e.results[0][0].transcript;
+          setInput(text);
+          setIsListening(false);
+        };
+        reco.onerror = () => setIsListening(false);
+        reco.onend = () => setIsListening(false);
+        setRecognition(reco);
+      }
+    }
+  }, []);
 
   // Seed the welcome message once the learner is known (personalised greeting).
   const welcomeMessage: ChatMessage | null = learner ? {

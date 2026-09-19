@@ -36,6 +36,7 @@ interface MockDbSchema {
   quiz_attempts: any[];
   quiz_attempt_answers: any[];
   quiz_files: any[];
+  pragya_practice_attempts: any[];
 }
 
 const DEFAULT_DB: MockDbSchema = {
@@ -52,6 +53,7 @@ const DEFAULT_DB: MockDbSchema = {
   quiz_attempts: [],
   quiz_attempt_answers: [],
   quiz_files: [],
+  pragya_practice_attempts: [],
 };
 
 // Safe helper to read the mock database file
@@ -78,6 +80,7 @@ export function getMockDb(): MockDbSchema {
     if (!db.quiz_attempt_answers) db.quiz_attempt_answers = [];
     if (!db.quiz_files) db.quiz_files = [];
     if (!db.pragya_learners) db.pragya_learners = [];
+    if (!db.pragya_practice_attempts) db.pragya_practice_attempts = [];
 
     // Seed quiz data if tables are empty
     if (db.quiz_subjects.length === 0) {
