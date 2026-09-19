@@ -68,7 +68,7 @@ export default function Sidebar({ userEmail }: SidebarProps) {
         {/* Logo */}
         <Link href="/dashboard" className="hidden sm:flex items-center pl-4 pr-6 border-r" style={{ borderColor: C.surfaceVariant }}>
           <span className="text-xl font-bold tracking-tight" style={{ color: C.primary, fontFamily: 'var(--font-fredoka), sans-serif' }}>
-            NIPUN Intelligence
+            PRAGYA
           </span>
         </Link>
         

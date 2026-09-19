@@ -1,4 +1,4 @@
-# 🚀 PRAGYA - NIPUN Intelligence — see the child, not the grade
+# 🚀 PRAGYA — see the child, not the grade
 
 > **ASER-inspired, teacher-administered FLN diagnostic for PS-E01 (KALACHAKRA 2K26)**
 
@@ -11,13 +11,13 @@
 ---
 
 > [!IMPORTANT]
-> **Affiliation Disclaimer:** Independent prototype inspired by publicly available ASER DIYA methodology. Not an official ASER / Pratham / NCERT / NIPUN Bharat product.
+> **Affiliation Disclaimer:** Independent prototype inspired by publicly available ASER DIYA methodology. Not an official ASER, Pratham, or NCERT product.
 
 ---
 
 ## 🌟 Overview
 
-**NIPUN Intelligence** is a teacher-led, sub-skill adaptive diagnostic tool designed for Foundational Literacy and Numeracy (FLN). It enables classroom teachers to evaluate students' actual reading and math capabilities, providing actionable, non-ranking insights for instructional grouping.
+**PRAGYA** is a teacher-led, sub-skill adaptive diagnostic tool designed for Foundational Literacy and Numeracy (FLN). It enables classroom teachers to evaluate students' actual reading and math capabilities, providing actionable, non-ranking insights for instructional grouping.
 
 ---
 

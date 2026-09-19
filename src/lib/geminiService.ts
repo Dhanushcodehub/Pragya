@@ -3,7 +3,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 const apiKey = process.env.GEMINI_API_KEY;
 
 if (!apiKey) {
-  console.warn('[NIPUN] GEMINI_API_KEY is not set in environment variables.');
+  console.warn('[PRAGYA] GEMINI_API_KEY is not set in environment variables.');
 }
 
 export const genAI = apiKey ? new GoogleGenerativeAI(apiKey) : null;
