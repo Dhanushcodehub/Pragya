@@ -48,6 +48,11 @@ class MockServerQueryBuilder {
     return this;
   }
 
+  ilike(field: string, value: any) {
+    this.filters.push({ field, value, type: 'ilike' });
+    return this;
+  }
+
   in(field: string, values: any[]) {
     this.filters.push({ field, value: values, type: 'in' });
     return this;
@@ -156,6 +161,8 @@ class SafeQueryBuilderProxy {
   update(...args: any[]) { return this.addMethod('update', args); }
   delete(...args: any[]) { return this.addMethod('delete', args); }
   eq(...args: any[]) { return this.addMethod('eq', args); }
+  ilike(...args: any[]) { return this.addMethod('ilike', args); }
+  or(...args: any[]) { return this.addMethod('or', args); }
   in(...args: any[]) { return this.addMethod('in', args); }
   neq(...args: any[]) { return this.addMethod('neq', args); }
   order(...args: any[]) { return this.addMethod('order', args); }
