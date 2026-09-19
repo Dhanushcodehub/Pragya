@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -21,26 +21,27 @@ export default function IntroVideoModal({ isOpen, onClose }: IntroVideoModalProp
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4 md:p-8">
+        <div className="fixed inset-0 z-[99999] bg-black flex items-center justify-center w-screen h-screen overflow-hidden">
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
+            initial={{ opacity: 0, scale: 1 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.4 }}
-            className="relative w-full max-w-5xl aspect-video bg-black rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(251,191,36,0.3)] border border-amber-900/50 flex flex-col items-center justify-center"
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="relative w-full h-full bg-black flex items-center justify-center"
           >
+            {/* Close / Skip button top right */}
             <button
               onClick={onClose}
-              className="absolute top-4 right-4 z-10 w-10 h-10 bg-black/50 hover:bg-black/80 rounded-full flex items-center justify-center text-white/70 hover:text-white transition-all backdrop-blur-md"
+              className="absolute top-6 right-6 z-50 px-4 py-2 bg-black/60 hover:bg-black/80 text-white font-bold text-sm rounded-full flex items-center gap-2 border border-white/20 backdrop-blur-md shadow-2xl transition-all hover:scale-105"
             >
-              <X className="w-6 h-6" />
+              <span>Skip Video</span>
+              <X className="w-5 h-5" />
             </button>
 
             <video 
               src="/videos/intro.mp4" 
-              className="w-full h-full object-contain"
+              className="w-full h-full object-cover pointer-events-none"
               autoPlay
-              controls
               playsInline
               onEnded={onClose}
             >

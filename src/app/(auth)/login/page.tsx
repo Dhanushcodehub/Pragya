@@ -97,26 +97,32 @@ function LoginForm() {
     setLoading(true);
     setError(null);
     
+    const cleanCode = studentCode.trim().toUpperCase();
+    const cleanPin = studentPin.trim();
+
     try {
       const supabase = createClient();
       const { data, error: supaError } = await supabase
         .from('pragya_learners')
         .select('*')
-        .eq('class_code', studentCode)
-        .eq('secret_pin', studentPin)
-        .single();
+        .ilike('class_code', cleanCode)
+        .eq('secret_pin', cleanPin)
+        .maybeSingle();
 
-      if (data) {
-        // Store student session in localStorage
-        localStorage.setItem('pragya_student_id', data.id);
-        localStorage.setItem('pragya_student_name', data.name);
+      if (supaError || !data) {
+        setError('Invalid Class Code or Secret PIN. Please ask your teacher!');
+        setLoading(false);
+        return;
       }
+
+      // Store student session in localStorage
+      localStorage.setItem('pragya_student_id', data.id);
+      localStorage.setItem('pragya_student_name', data.name);
       
       // Redirect directly to the gamified student portal
       router.push('/student');
     } catch (err: any) {
-      // For demo fallback, still allow entry to student portal if requested
-      router.push('/student');
+      setError('An error occurred during student login. Please try again.');
     } finally {
       setLoading(false);
     }

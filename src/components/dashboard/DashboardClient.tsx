@@ -55,7 +55,7 @@ export default function DashboardClient({ userEmail }: DashboardClientProps) {
     if (classData) {
       // 3. Fetch learners for this classroom
       const { data: learnersData } = await supabase.from('pragya_learners').select('*').eq('classroom_id', classData.id);
-      if (learnersData && learnersData.length >= 10) {
+      if (learnersData && learnersData.length > 0) {
         setLearners(learnersData);
       } else {
         await generateDemoDataForClass(classData.id);
@@ -105,7 +105,6 @@ export default function DashboardClient({ userEmail }: DashboardClientProps) {
       status: s.status,
     }));
 
-    await supabase.from('pragya_learners').delete().eq('classroom_id', classId);
     const { data } = await supabase.from('pragya_learners').insert(demoStudents).select();
     if (data) setLearners(data);
   };
@@ -124,12 +123,12 @@ export default function DashboardClient({ userEmail }: DashboardClientProps) {
 
     const { error } = await supabase.from('pragya_learners').insert({
       classroom_id: classroom.id,
-      name: newStudentName,
-      class_code: newStudentUsername, // This acts as the Student ID
-      secret_pin: newStudentPassword,
+      name: newStudentName.trim(),
+      class_code: newStudentUsername.trim().toUpperCase(), // Student ID / Class Code
+      secret_pin: newStudentPassword.trim(),
       avatar_emoji: avatar,
-      reading_level: 'not-assessed',
-      numeracy_level: 'not-assessed',
+      reading_level: 'beginner',
+      numeracy_level: 'beginner',
       status: 'developing' // Default status
     });
 

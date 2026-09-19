@@ -5,19 +5,17 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Volume2, ArrowRight, ArrowLeft, CheckCircle2, Sparkles, Loader2, Mic, MicOff } from 'lucide-react';
-import { MOCK_PRACTICE_QUESTIONS } from '@/lib/nipun/syntheticData';
+import { getSyllabusQuestions, getChapterLabel, NCERT_CLASS_3_QUESTION_BANK, NcertQuestion } from '@/lib/nipun/ncertSyllabus';
+import { ReadingLevel, NumeracyLevel } from '@/lib/nipun/types';
 import { useStudent } from '@/lib/nipun/StudentContext';
 import MasteryChallenge from './MasteryChallenge';
-
-// Types are provided by standard library or we can cast to any when needed
 
 export default function PracticeZone() {
   const searchParams = useSearchParams();
   const pathwayParam = searchParams?.get('pathway') || 'reading';
   const isChallenge = searchParams?.get('challenge') === 'true';
 
-  const { learner, isLoading, addXp } = useStudent();
-  const [currentIdx, setCurrentIdx] = useState(0);
+  const { learner, isLoading, addXp, updateLevel } = useStudent();
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [totalXp, setTotalXp] = useState(0);
@@ -62,11 +60,47 @@ export default function PracticeZone() {
     }
   }, []);
 
+  // NCERT Class 3 level ladders
+  const readingLadder: ReadingLevel[] = ['letter', 'word', 'paragraph', 'story'];
+  const numeracyLadder: NumeracyLevel[] = ['number_1_9', 'number_11_99', 'subtraction', 'division'];
+  
+  const ladder = pathwayParam === 'numeracy' ? numeracyLadder : readingLadder;
+  
+  const levelLabels: Record<string, string> = {
+    letter: 'Letter Phonics',
+    word: 'Word Builder',
+    paragraph: 'Paragraph Explorer',
+    story: 'Story Master',
+    number_1_9: 'Numbers 1–9',
+    number_11_99: 'Place Value 11–99',
+    subtraction: 'Subtraction Solver',
+    division: 'Equal Sharing & Division',
+  };
+
+  const getInitialLevelIdx = () => {
+    const rawLevel = pathwayParam === 'numeracy' ? learner?.numeracyLevel : learner?.readingLevel;
+    const strLevel = String(rawLevel || '');
+    if (strLevel.startsWith('number-recognition-11')) return 1;
+    if (strLevel.startsWith('number-recognition-1')) return 0;
+    const idx = ladder.indexOf(strLevel as any);
+    return idx >= 0 ? idx : 0;
+  };
+
+  const [levelIdx, setLevelIdx] = useState(getInitialLevelIdx());
+  const [streak, setStreak] = useState(0);
+  const [attemptedIds, setAttemptedIds] = useState<string[]>([]);
+  const [questionsAnswered, setQuestionsAnswered] = useState(0);
+  const [adaptiveBanner, setAdaptiveBanner] = useState<string | null>('✨ Adaptive Quest: Adapting difficulty to your skills!');
+  
+  const [currentQ, setCurrentQ] = useState<NcertQuestion>(() => {
+    const startLevel = ladder[getInitialLevelIdx()];
+    const pool = NCERT_CLASS_3_QUESTION_BANK.filter(q => q.pathway === pathwayParam && q.level === startLevel);
+    return pool[0] || NCERT_CLASS_3_QUESTION_BANK.filter(q => q.pathway === pathwayParam)[0];
+  });
+
+  // Early returns AFTER all hooks (rules-of-hooks: hook count must not change between renders)
   if (isLoading) return <div className="flex justify-center p-12"><Loader2 className="w-8 h-8 animate-spin text-amber-500" /></div>;
   if (!learner) return null;
-
-  const questions = MOCK_PRACTICE_QUESTIONS.filter(q => q.pathway === pathwayParam) || MOCK_PRACTICE_QUESTIONS;
-  const currentQ = questions[currentIdx] || questions[0];
 
   const handlePlayAudio = (text?: string) => {
     if ('speechSynthesis' in window && text) {
@@ -111,12 +145,42 @@ export default function PracticeZone() {
 
   const submitSpecificAnswer = (opt: string) => {
     setIsSubmitted(true);
-    if (opt === currentQ.correctAnswer) {
+    setAttemptedIds(prev => [...prev, currentQ.id]);
+    setQuestionsAnswered(prev => prev + 1);
+
+    const isRight = opt === currentQ.correctAnswer;
+
+    if (isRight) {
       setTotalXp(prev => prev + currentQ.xp);
       if (addXp) addXp(currentQ.xp);
-      handlePlayAudio('Great job! That is correct!');
+      
+      const newStreak = streak + 1;
+      setStreak(newStreak);
+
+      if (newStreak >= 2 && levelIdx < ladder.length - 1) {
+        const nextLvl = levelIdx + 1;
+        setLevelIdx(nextLvl);
+        setStreak(0);
+        const nextLevelKey = ladder[nextLvl];
+        if (updateLevel) updateLevel(pathwayParam === 'numeracy' ? 'numeracy' : 'reading', nextLevelKey);
+        setAdaptiveBanner(`🚀 LEVEL UP! Mastered ${levelLabels[ladder[levelIdx]]}! Advancing to ${levelLabels[nextLevelKey]}!`);
+        handlePlayAudio(`Level up! You are now entering ${levelLabels[nextLevelKey]}!`);
+      } else {
+        setAdaptiveBanner(`🌟 Great job! Correct answer! (+${currentQ.xp} XP)`);
+        handlePlayAudio('Great job! That is correct!');
+      }
     } else {
-      handlePlayAudio('Good try! Let us review the correct answer.');
+      setStreak(0);
+      if (levelIdx > 0) {
+        const lowerLvl = levelIdx - 1;
+        setLevelIdx(lowerLvl);
+        const lowerLevelKey = ladder[lowerLvl];
+        setAdaptiveBanner(`💡 Adaptive Assistance: Stepping back to ${levelLabels[lowerLevelKey]} to build your foundation!`);
+        handlePlayAudio(`Don't worry! Let's practice a simpler step to build your skills.`);
+      } else {
+        setAdaptiveBanner(`💪 Good effort! Let us try another practice question together.`);
+        handlePlayAudio('Good try! Let us review the correct answer.');
+      }
     }
   };
 
@@ -125,14 +189,32 @@ export default function PracticeZone() {
     submitSpecificAnswer(selectedOption);
   };
 
+  const getNextAdaptiveQuestion = (targetLevelIdx: number, usedIds: string[]): NcertQuestion => {
+    const targetLevel = ladder[targetLevelIdx];
+    const pathwayBank = NCERT_CLASS_3_QUESTION_BANK.filter(q => q.pathway === pathwayParam);
+    
+    // 1. Unattempted questions at target level
+    let candidates = pathwayBank.filter(q => q.level === targetLevel && !usedIds.includes(q.id));
+    if (candidates.length > 0) return candidates[Math.floor(Math.random() * candidates.length)];
+    
+    // 2. Any unattempted questions in pathway
+    candidates = pathwayBank.filter(q => !usedIds.includes(q.id));
+    if (candidates.length > 0) return candidates[Math.floor(Math.random() * candidates.length)];
+
+    // 3. Fallback to any question in pathway
+    return pathwayBank[Math.floor(Math.random() * pathwayBank.length)];
+  };
+
   const handleNextQuestion = () => {
     setSelectedOption(null);
     setIsSubmitted(false);
     setTranscript('');
-    if (currentIdx + 1 < questions.length) {
-      setCurrentIdx(prev => prev + 1);
-    } else {
+
+    if (questionsAnswered >= 6) {
       setShowChallenge(true);
+    } else {
+      const nextQ = getNextAdaptiveQuestion(levelIdx, [...attemptedIds, currentQ.id]);
+      setCurrentQ(nextQ);
     }
   };
 
@@ -147,7 +229,11 @@ export default function PracticeZone() {
             <ArrowLeft className="w-5 h-5" />
           </Link>
         </div>
-        <MasteryChallenge conceptName={pathwayParam === 'reading' ? 'Paragraph Explorer' : 'Subtraction Solver'} />
+        <MasteryChallenge
+          conceptName={pathwayParam === 'reading' ? 'Paragraph Explorer' : 'Subtraction Solver'}
+          pathway={pathwayParam}
+          level={String(ladder[levelIdx])}
+        />
       </div>
     );
   }
@@ -167,19 +253,42 @@ export default function PracticeZone() {
       <div className="absolute inset-0 z-0 bg-gradient-to-b from-black/80 via-transparent to-black/90 pointer-events-none" />
 
       {/* HEADER OVERLAY */}
-      <div className="relative z-10 flex items-center justify-between p-4 sm:p-6 w-full">
-        <Link
-          href="/student/quest"
-          className="flex items-center gap-2 px-4 py-2 rounded-xl bg-black/40 hover:bg-black/60 backdrop-blur-md border border-white/20 text-white font-bold transition-colors shadow-lg"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          <span className="hidden sm:inline">Escape to Map</span>
-        </Link>
+      <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between p-4 sm:p-6 w-full gap-2">
+        <div className="flex items-center gap-3">
+          <Link
+            href="/student/quest"
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-black/40 hover:bg-black/60 backdrop-blur-md border border-white/20 text-white font-bold transition-colors shadow-lg"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span className="hidden sm:inline">Escape to Map</span>
+          </Link>
+
+          {/* ADAPTIVE LEVEL INDICATOR */}
+          <div className="px-4 py-2 rounded-xl bg-indigo-950/80 backdrop-blur-md border border-indigo-400/50 text-indigo-200 font-bold text-xs sm:text-sm flex items-center gap-2 shadow-lg">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+            <span>Target: {levelLabels[ladder[levelIdx]] || 'Adaptive'}</span>
+          </div>
+        </div>
+
         <div className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-amber-500/90 backdrop-blur-sm border-2 border-amber-300 text-white font-black shadow-[0_0_25px_rgba(245,158,11,0.6)]">
           <Sparkles className="w-5 h-5 fill-white animate-pulse" />
           <span>+{totalXp} XP</span>
         </div>
       </div>
+
+      {/* DYNAMIC ADAPTIVE BANNER */}
+      {adaptiveBanner && (
+        <motion.div
+          key={adaptiveBanner}
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative z-10 max-w-2xl mx-auto px-4 text-center"
+        >
+          <div className="px-4 py-1.5 rounded-full bg-black/60 backdrop-blur-md border border-amber-400/40 text-amber-200 text-xs sm:text-sm font-bold shadow-xl inline-flex items-center gap-2">
+            <span>{adaptiveBanner}</span>
+          </div>
+        </motion.div>
+      )}
 
       <div className="relative z-10 flex-1 flex flex-col justify-between w-full h-full pb-6 px-4">
         
@@ -196,6 +305,11 @@ export default function PracticeZone() {
           <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white leading-tight" style={{ textShadow: '0 4px 10px rgba(0,0,0,1), 0 2px 4px rgba(0,0,0,1)' }}>
             {currentQ.content}
           </h2>
+          {currentQ && (
+            <p className="text-[11px] sm:text-xs font-bold text-amber-300/90 uppercase tracking-widest drop-shadow-[0_2px_4px_rgba(0,0,0,1)]">
+              {getChapterLabel(currentQ)}
+            </p>
+          )}
         </div>
 
         {/* SPACER TO PUSH CAVES TO THE BOTTOM */}
@@ -253,7 +367,7 @@ export default function PracticeZone() {
                 </button>
                 {transcript && (
                   <p className="mt-2 text-amber-300 font-black text-xl drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)]">
-                    "{transcript}"
+                    &ldquo;{transcript}&rdquo;
                   </p>
                 )}
               </div>
@@ -289,7 +403,7 @@ export default function PracticeZone() {
                     onClick={handleNextQuestion}
                     className="mt-2 w-full py-3 sm:py-4 bg-white text-gray-900 font-black text-base sm:text-xl rounded-2xl shadow-xl transition-all hover:bg-gray-100 hover:scale-105 flex items-center justify-center gap-2 uppercase tracking-wide border-b-4 border-gray-300"
                   >
-                    <span>{currentIdx + 1 < questions.length ? 'Next Challenge' : 'Face the Boss'}</span>
+                    <span>{questionsAnswered >= 6 ? 'Face the Boss' : 'Next Challenge'}</span>
                     <ArrowRight className="w-5 h-5 sm:w-6 sm:h-6" />
                   </button>
                 </div>

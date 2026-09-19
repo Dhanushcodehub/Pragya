@@ -32,21 +32,26 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     async function loadStudent() {
       try {
-        let studentId = localStorage.getItem('pragya_student_id');
+        const studentId = localStorage.getItem('pragya_student_id');
         if (!studentId) {
-          studentId = 'learner-001';
-          localStorage.setItem('pragya_student_id', studentId);
+          setLearner(null);
+          setIsLoading(false);
+          return;
         }
 
         const { data, error } = await supabase
           .from('pragya_learners')
           .select('*')
           .eq('id', studentId)
-          .single();
+          .maybeSingle();
 
         if (error || !data) {
-          console.warn("Failed to load student from Supabase, falling back to mock data:", error);
-          setLearner(MOCK_ACTIVE_STUDENT);
+          console.warn("Failed to load student from database:", error);
+          if (studentId === 'learner-001') {
+            setLearner(MOCK_ACTIVE_STUDENT);
+          } else {
+            setLearner(null);
+          }
           setIsLoading(false);
           return;
         }
@@ -60,12 +65,12 @@ export function StudentProvider({ children }: { children: React.ReactNode }) {
           ...MOCK_ACTIVE_STUDENT,
           id: data.id,
           name: data.name,
-          grade: 3, // default or parse from class_code
+          grade: 3,
           readingLevel: data.reading_level || 'beginner',
           numeracyLevel: data.numeracy_level || 'beginner',
-          xp: localProgress.xp,
-          streakDays: localProgress.streakDays,
-          
+          xp: typeof localProgress.xp === 'number' ? localProgress.xp : 0,
+          streakDays: typeof localProgress.streakDays === 'number' ? localProgress.streakDays : 0,
+          avatar: data.avatar_emoji || MOCK_ACTIVE_STUDENT.avatar,
         };
 
         setLearner(activeLearner);
