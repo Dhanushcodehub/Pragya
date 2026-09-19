@@ -112,113 +112,90 @@ export const MOCK_ACTIVE_STUDENT: Learner = {
 
 // Reading World Progression Stages (Matching AGENTS.md Section 6)
 export function getReadingWorldStages(learner: Learner): WorldStage[] {
-  return [
-    {
-      id: 'stage-r1',
-      name: 'Letter Explorer',
-      description: 'Identify basic letter sounds and symbols',
-      icon: '',
-      pathway: 'reading',
-      level: 'letter',
-      status: 'mastered',
-      progressPercent: 100,
-      xpReward: 100,
-    },
-    {
-      id: 'stage-r2',
-      name: 'Word Builder',
-      description: 'Recognize common 2-letter and 3-letter words',
-      icon: '',
-      pathway: 'reading',
-      level: 'word',
-      status: 'mastered',
-      progressPercent: 100,
-      xpReward: 150,
-    },
-    {
-      id: 'stage-r3',
-      name: 'Sentence Navigator',
-      description: 'Read short 4-word sentences with fluency',
-      icon: '',
-      pathway: 'reading',
-      level: 'paragraph',
-      status: 'mastered',
-      progressPercent: 100,
-      xpReward: 200,
-    },
-    {
-      id: 'stage-r4',
-      name: 'Paragraph Explorer',
-      description: 'Read connected text (4 simple sentences)',
-      icon: '',
-      pathway: 'reading',
-      level: 'paragraph',
-      status: 'current',
-      progressPercent: 72,
-      xpReward: 250,
-    },
-    {
-      id: 'stage-r5',
-      name: 'Story Master',
-      description: 'Read 7-10 sentence story with full comprehension',
-      icon: '',
-      pathway: 'reading',
-      level: 'story',
-      status: 'locked',
-      progressPercent: 0,
-      xpReward: 300,
-    },
+  const ladderOrder = ['beginner', 'letter', 'word', 'paragraph', 'story'];
+  const currentLvl = String(learner?.readingLevel || 'beginner');
+  const currentIdx = ladderOrder.indexOf(currentLvl) >= 0 ? ladderOrder.indexOf(currentLvl) : 0;
+
+  const rawStages = [
+    { id: 'stage-r1', name: 'Letter Explorer', description: 'Identify basic letter sounds and symbols', level: 'letter', xpReward: 100 },
+    { id: 'stage-r2', name: 'Word Builder', description: 'Recognize common 2-letter and 3-letter words', level: 'word', xpReward: 150 },
+    { id: 'stage-r3', name: 'Sentence Navigator', description: 'Read short 4-word sentences with fluency', level: 'paragraph', xpReward: 200 },
+    { id: 'stage-r4', name: 'Paragraph Explorer', description: 'Read connected text (4 simple sentences)', level: 'paragraph', xpReward: 250 },
+    { id: 'stage-r5', name: 'Story Master', description: 'Read 7-10 sentence story with full comprehension', level: 'story', xpReward: 300 },
   ];
+
+  return rawStages.map((stg, idx) => {
+    // Map stage index to ladder index: stage 0 = letter(1), 1 = word(2), 2 = sentence(3), 3 = paragraph(3), 4 = story(4)
+    const stageLadderIdx = idx + 1;
+    let status: 'mastered' | 'current' | 'locked' = 'locked';
+    let progressPercent = 0;
+
+    if (currentIdx > stageLadderIdx) {
+      status = 'mastered';
+      progressPercent = 100;
+    } else if (currentIdx === stageLadderIdx || (currentIdx === 0 && idx === 0)) {
+      status = 'current';
+      progressPercent = currentIdx === 0 ? 0 : 50;
+    } else {
+      status = 'locked';
+      progressPercent = 0;
+    }
+
+    return {
+      id: stg.id,
+      name: stg.name,
+      description: stg.description,
+      icon: '',
+      pathway: 'reading',
+      level: stg.level as any,
+      status,
+      progressPercent,
+      xpReward: stg.xpReward,
+    };
+  });
 }
 
 // Numeracy World Progression Stages (Matching AGENTS.md Section 6)
 export function getNumeracyWorldStages(learner: Learner): WorldStage[] {
-  return [
-    {
-      id: 'stage-n1',
-      name: 'Number Explorer',
-      description: 'Recognize numbers from 1 to 9',
-      icon: '',
-      pathway: 'numeracy',
-      level: 'number_1_9',
-      status: 'mastered',
-      progressPercent: 100,
-      xpReward: 100,
-    },
-    {
-      id: 'stage-n2',
-      name: 'Number Navigator',
-      description: 'Recognize 2-digit numbers (11 to 99)',
-      icon: '',
-      pathway: 'numeracy',
-      level: 'number_11_99',
-      status: 'mastered',
-      progressPercent: 100,
-      xpReward: 150,
-    },
-    {
-      id: 'stage-n3',
-      name: 'Subtraction Solver',
-      description: 'Solve 2-digit subtraction with borrowing',
-      icon: '',
-      pathway: 'numeracy',
-      level: 'subtraction',
-      status: 'current',
-      progressPercent: 68,
-      xpReward: 250,
-    },
-    {
-      id: 'stage-n4',
-      name: 'Division Master',
-      description: 'Solve 3-digit by 1-digit division problems',
-      icon: '',
-      pathway: 'numeracy',
-      level: 'division',
-      status: 'locked',
-      progressPercent: 0,
-      xpReward: 300,
-    },
+  const ladderOrder = ['beginner', 'number_1_9', 'number_11_99', 'subtraction', 'division'];
+  const currentLvl = String(learner?.numeracyLevel || 'beginner');
+  const currentIdx = ladderOrder.indexOf(currentLvl) >= 0 ? ladderOrder.indexOf(currentLvl) : 0;
+
+  const rawStages = [
+    { id: 'stage-n1', name: 'Number Explorer', description: 'Recognize numbers from 1 to 9', level: 'number_1_9', xpReward: 100 },
+    { id: 'stage-n2', name: 'Number Navigator', description: 'Recognize 2-digit numbers (11 to 99)', level: 'number_11_99', xpReward: 150 },
+    { id: 'stage-n3', name: 'Subtraction Solver', description: 'Solve 2-digit subtraction with borrowing', level: 'subtraction', xpReward: 250 },
+    { id: 'stage-n4', name: 'Division Master', description: 'Solve 3-digit by 1-digit division problems', level: 'division', xpReward: 300 },
   ];
+
+  return rawStages.map((stg, idx) => {
+    const stageLadderIdx = idx + 1;
+    let status: 'mastered' | 'current' | 'locked' = 'locked';
+    let progressPercent = 0;
+
+    if (currentIdx > stageLadderIdx) {
+      status = 'mastered';
+      progressPercent = 100;
+    } else if (currentIdx === stageLadderIdx || (currentIdx === 0 && idx === 0)) {
+      status = 'current';
+      progressPercent = currentIdx === 0 ? 0 : 50;
+    } else {
+      status = 'locked';
+      progressPercent = 0;
+    }
+
+    return {
+      id: stg.id,
+      name: stg.name,
+      description: stg.description,
+      icon: '',
+      pathway: 'numeracy',
+      level: stg.level as any,
+      status,
+      progressPercent,
+      xpReward: stg.xpReward,
+    };
+  });
 }
 
 // Sample Practice Questions for Student Practice Zone

@@ -122,7 +122,10 @@ export default function DashboardClient({ userEmail }: DashboardClientProps) {
       ? ['/avatars/boy_1.jpg', '/avatars/boy_2.png'][Math.floor(Math.random() * 2)]
       : '/avatars/girl_1.png';
 
+    const newStudentId = `learner-${Date.now()}`;
+
     const { error } = await supabase.from('pragya_learners').insert({
+      id: newStudentId,
       classroom_id: classroom.id,
       name: newStudentName.trim(),
       class_code: newStudentUsername.trim().toUpperCase(), // Student ID / Class Code
@@ -146,7 +149,8 @@ export default function DashboardClient({ userEmail }: DashboardClientProps) {
       // Refresh the grid
       fetchData();
     } else {
-      alert('Error creating student ID.');
+      console.error("Error creating student:", error);
+      alert(`Error creating student ID: ${error.message || 'Check database connection'}`);
     }
   };
 
