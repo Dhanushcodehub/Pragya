@@ -2,7 +2,37 @@
 import React, { useState, useEffect } from 'react';
 import type { PragyaLearner } from '@/lib/types';
 import { BookOpen, Hash, Filter, X, Star, TrendingUp } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
+
+// Stagger container: children animate in sequence
+const gridVariants: Variants = {
+  hidden: {},
+  show: {
+    transition: {
+      staggerChildren: 0.04,
+      delayChildren: 0.05,
+    },
+  },
+  exit: {
+    transition: { staggerChildren: 0.02, staggerDirection: -1 },
+  },
+};
+
+const cardVariants: Variants = {
+  hidden: { opacity: 0, y: 12, scale: 0.97 },
+  show: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: { type: 'spring', stiffness: 280, damping: 26 },
+  },
+  exit: {
+    opacity: 0,
+    y: -8,
+    scale: 0.96,
+    transition: { duration: 0.15, ease: 'easeIn' },
+  },
+};
 
 const getStatusBadgeStyle = (status: string) => {
   switch(status) {
@@ -95,18 +125,23 @@ export default function ClassroomLearningMap({ learners }: { learners: PragyaLea
             </div>
           ) : (
             <div className="flex flex-col gap-8">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                <AnimatePresence mode="popLayout">
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div
+                  key={`page-${currentPage}-${filter}`}
+                  variants={gridVariants}
+                  initial="hidden"
+                  animate="show"
+                  exit="exit"
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+                >
                   {paginatedLearners.map((learner) => (
                     <motion.div 
                       key={learner.id}
-                      layout
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      whileHover={{ y: -3, transition: { duration: 0.2 } }}
+                      variants={cardVariants}
+                      whileHover={{ y: -4, boxShadow: '0 8px 24px -4px rgba(0,0,0,0.10)', transition: { type: 'spring', stiffness: 400, damping: 28 } }}
+                      whileTap={{ scale: 0.98 }}
                       onClick={() => setSelectedLearner(learner)}
-                      className="bg-white rounded-2xl p-5 border border-zinc-200/80 shadow-2xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between"
+                      className="bg-white rounded-2xl p-5 border border-zinc-200/80 shadow-2xs cursor-pointer flex flex-col justify-between"
                     >
                       {/* Top Row: Avatar + Name + PIN */}
                       <div>
@@ -120,7 +155,10 @@ export default function ClassroomLearningMap({ learners }: { learners: PragyaLea
                           </div>
                           <div className="min-w-0">
                             <div className="text-zinc-900 font-extrabold text-base leading-tight truncate">{learner.name}</div>
-                            <div className="text-[11px] text-zinc-400 font-mono font-medium mt-0.5">PIN: {learner.secret_pin}</div>
+                            <div className="text-[11px] text-zinc-500 font-mono font-medium mt-0.5 flex flex-col leading-tight">
+                              <span>Code: <strong className="text-zinc-800 font-bold">{learner.class_code}</strong></span>
+                              <span>PIN: <strong className="text-zinc-800 font-bold">{learner.secret_pin}</strong></span>
+                            </div>
                           </div>
                         </div>
                         
@@ -149,8 +187,8 @@ export default function ClassroomLearningMap({ learners }: { learners: PragyaLea
                       </div>
                     </motion.div>
                   ))}
-                </AnimatePresence>
-              </div>
+                </motion.div>
+              </AnimatePresence>
 
               {/* Pagination Controls */}
               {totalPages > 1 && (

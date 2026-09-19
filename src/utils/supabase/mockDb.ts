@@ -143,7 +143,7 @@ export async function getSessionUser(cookieStore: any): Promise<MockUser | null>
 export async function runMockQuery(builder: {
   table: string;
   queryType: 'select' | 'insert' | 'update' | 'delete';
-  filters: Array<{ field: string; value: any; type: 'eq' | 'in' | 'neq' }>;
+  filters: Array<{ field: string; value: any; type: 'eq' | 'in' | 'neq' | 'ilike' }>;
   insertData: any;
   updateData: any;
   maybeSingleFlag: boolean;
@@ -185,6 +185,12 @@ export async function runMockQuery(builder: {
           return val.toLowerCase() === filter.value.toLowerCase();
         }
         return val === filter.value;
+      });
+    } else if (filter.type === 'ilike') {
+      const targetVal = String(filter.value || '').toLowerCase();
+      filtered = filtered.filter(row => {
+        const val = String(row[filter.field] || '').toLowerCase();
+        return val === targetVal || val.includes(targetVal);
       });
     } else if (filter.type === 'in') {
       const values = Array.isArray(filter.value) ? filter.value : [filter.value];

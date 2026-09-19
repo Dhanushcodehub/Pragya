@@ -132,6 +132,9 @@ export async function POST(request: Request) {
         updateData: body.updateData,
         maybeSingleFlag: body.maybeSingleFlag,
         singleFlag: body.singleFlag,
+        limitCount: body.limitCount,
+        orderField: body.orderField,
+        orderAscending: body.orderAscending,
         currentUserId,
         isAdmin: body.isAdmin,
       });

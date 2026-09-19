@@ -8,6 +8,9 @@ class MockClientQueryBuilder {
   updateData: any = null;
   singleFlag = false;
   maybeSingleFlag = false;
+  limitCount?: number;
+  orderField?: string;
+  orderAscending = true;
 
   constructor(table: string) {
     this.table = table;
@@ -40,6 +43,32 @@ class MockClientQueryBuilder {
     return this;
   }
 
+  ilike(field: string, value: any) {
+    this.filters.push({ field, value, type: 'ilike' });
+    return this;
+  }
+
+  in(field: string, values: any[]) {
+    this.filters.push({ field, value: values, type: 'in' });
+    return this;
+  }
+
+  neq(field: string, value: any) {
+    this.filters.push({ field, value, type: 'neq' });
+    return this;
+  }
+
+  limit(count: number) {
+    this.limitCount = count;
+    return this;
+  }
+
+  order(field: string, options?: { ascending?: boolean }) {
+    this.orderField = field;
+    this.orderAscending = options?.ascending ?? true;
+    return this;
+  }
+
   single() {
     this.singleFlag = true;
     return this;
@@ -64,6 +93,9 @@ class MockClientQueryBuilder {
           updateData: this.updateData,
           singleFlag: this.singleFlag,
           maybeSingleFlag: this.maybeSingleFlag,
+          limitCount: this.limitCount,
+          orderField: this.orderField,
+          orderAscending: this.orderAscending,
         }),
       });
       const data = await res.json();

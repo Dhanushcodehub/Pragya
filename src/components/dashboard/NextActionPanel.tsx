@@ -16,9 +16,9 @@ export default function NextActionPanel({ learners }: { learners: PragyaLearner[
 
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 15 }}
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
+      transition={{ type: 'spring', stiffness: 260, damping: 24, delay: 0 }}
       className="bg-[#ffe4d1] rounded-[2rem] border border-orange-200/80 p-7 flex-1 flex flex-col justify-between shadow-xs"
     >
       <div>
@@ -46,7 +46,7 @@ export default function NextActionPanel({ learners }: { learners: PragyaLearner[
           {strugglingStudents.map(l => (
             <motion.div 
               key={l.id} 
-              whileHover={{ scale: 1.05, y: -2 }}
+              whileHover={{ scale: 1.05, y: -2, transition: { type: 'spring', stiffness: 400, damping: 26 } }}
               className="bg-white/90 backdrop-blur-sm pr-3.5 pl-1.5 py-1 rounded-full flex items-center gap-2 border border-orange-200/80 shadow-xs cursor-pointer"
             >
               <div className="w-6 h-6 rounded-full overflow-hidden bg-orange-100 flex items-center justify-center shrink-0 border border-orange-200">
@@ -74,9 +74,9 @@ export default function NextActionPanel({ learners }: { learners: PragyaLearner[
       
       {/* Dark Action Button */}
       <motion.button 
-        whileHover={{ scale: 1.01 }}
-        whileTap={{ scale: 0.98 }}
-        className="w-full py-4 bg-[#2a1309] hover:bg-black text-white rounded-2xl font-bold text-sm flex justify-center items-center gap-2 transition-all shadow-md active:scale-95 mt-2"
+        whileHover={{ scale: 1.01, transition: { type: 'spring', stiffness: 400, damping: 28 } }}
+        whileTap={{ scale: 0.97 }}
+        className="w-full py-4 bg-[#2a1309] hover:bg-black text-white rounded-2xl font-bold text-sm flex justify-center items-center gap-2 transition-colors shadow-md mt-2"
       >
         Generate AI Lesson Plan <ArrowRight className="w-4 h-4 stroke-[2.5]" />
       </motion.button>

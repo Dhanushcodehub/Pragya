@@ -39,16 +39,17 @@ export default function DashboardClient({ userEmail }: DashboardClientProps) {
     if (!user) return;
 
     // 2. Try to fetch their classroom
-    let { data: classData } = await supabase.from('pragya_classrooms').select('*').eq('teacher_id', user.id).single();
+    const { data: classRows } = await supabase.from('pragya_classrooms').select('*').eq('teacher_id', user.id).limit(1);
+    let classData = classRows && classRows.length > 0 ? classRows[0] : null;
     
     // If no classroom exists, create one implicitly
     if (!classData) {
-      const { data: newClass } = await supabase.from('pragya_classrooms').insert({
+      const { data: newClasses } = await supabase.from('pragya_classrooms').insert({
         name: "Class 5A",
         teacher_id: user.id,
         grade_level: "Grade 5"
-      }).select().single();
-      classData = newClass;
+      }).select().limit(1);
+      classData = newClasses && newClasses.length > 0 ? newClasses[0] : null;
     }
     setClassroom(classData);
 
