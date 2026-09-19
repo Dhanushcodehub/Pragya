@@ -40,8 +40,6 @@ export default function Sidebar({ userEmail }: SidebarProps) {
   };
 
   const navItems = [
-    { name: 'Command Center', href: '/dashboard', icon: GraduationCap },
-    { name: 'Classroom Map', href: '/dashboard', icon: Compass },
     { name: 'Upload Materials', href: '/upload', icon: Upload },
   ];
 
